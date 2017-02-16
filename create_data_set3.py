@@ -8,7 +8,6 @@ import re
 import copy
 import datetime
 import pymysql
-from pypinyin import lazy_pinyin
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold,cross_val_score
@@ -367,7 +366,7 @@ def create_dataset():
                             'before_all_divide_6', 'before_all_divide_5', 'before_all_divide_4', 'before_all_divide_3',
                             'before_all_divide_2', 'before_all_divide_1',
                             'before_all_14_average_divide', 'before_all_7_average_divide', 'before_all_3_average_divide',
-                            'day1','day2','day3','day4','day5','day6','day7']
+                            'day']
                             )
             for i in range(1,2001):
                 z=float(shop_average.ix[i,'average_view'])
@@ -490,8 +489,9 @@ def train():
         t=pd.read_csv('dataset{}{}.csv'.format(i,i))
 
         # 用模型训练
+        feat_labels=t.columns[2:-1]
         x, y = t.ix[:, 2:-1].values, t.ix[:, -1].values
-        forest = RandomForestRegressor(n_estimators=1000,random_state=0,n_jobs=-1,max_depth=50,oob_score=True)#oob_score代替交叉验证
+        forest = RandomForestRegressor(n_estimators=200,random_state=0,n_jobs=-1,max_depth=20,max_features=0.5,oob_score=True)#oob_score代替交叉验证
         forest = forest.fit(x, y)
         print forest.score(x, y)
 
@@ -500,7 +500,7 @@ def train():
         importances=forest.feature_importances_
         indices=np.argsort(importances)[::-1]
         for f in range(x.shape[1]):
-            print indices[f],importances[indices[f]]
+            print feat_labels[indices[f]],importances[indices[f]]
 
         #保存模型
         os.chdir('../model/')
