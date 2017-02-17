@@ -652,6 +652,7 @@ def create_dataset():
         dataset = pd.concat([dataset.ix[:, :-1], t1, t2,
                              t3, t4, dataset.ix[:, -1]], axis=1)
         dataset.to_csv(path_or_buf='datasetm{}{}.csv'.format(i, i), index=False)
+        os.remove('dataset{}.csv'.format(i))
     for i in range(1, 15):
         os.rename('datasetm{}{}.csv'.format(i, i),'dataset{}.csv'.format(i))
 
