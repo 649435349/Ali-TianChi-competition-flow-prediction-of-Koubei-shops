@@ -368,6 +368,7 @@ def date_to_string(date):
 
 
 def create_dataset():
+
     os.chdir('../dataset/')
     all_shop_day_average_pay = pd.read_csv('all_shop_day_average_pay.csv')
     all_shop_day_average_view = pd.read_csv('all_shop_day_average_view.csv')
@@ -638,20 +639,13 @@ def create_dataset():
                     res.insert(1, date_to_string(d + (q - 1) * delta))  # 改
                     begin_date += delta
                     writer.writerow(res)
+
     # one hot coding
     for i in range(1, 15):
         dataset = pd.read_csv('dataset{}.csv'.format(i))
         t1 = pd.get_dummies(dataset['city_level'], prefix='city_level')
         t2 = pd.get_dummies(dataset['weather'], prefix='weather')
         t3 = pd.get_dummies(dataset['weekday'], prefix='weekday')
-        weekday = dataset.ix[1, 'weekday']
-        t3 = pd.concat([pd.DataFrame([[0] * (weekday - 1)] * 2000,
-                                     columns=['weekday_{}'.format(j) for j in range(1,
-                                                                                    weekday)]),
-                        t3,
-                        pd.DataFrame([[0] * (7 - weekday)] * 2000,
-                                     columns=['weekday_{}'.format(j) for j in range(weekday + 1,
-                                                                                    8)])])
         t4 = pd.get_dummies(dataset['holiday'], prefix='holiday')
         del dataset['city_level'], dataset[
             'weather'], dataset['weekday'], dataset['holiday']
@@ -659,7 +653,6 @@ def create_dataset():
                              t3, t4, dataset.ix[:, -1]], axis=1)
         dataset.to_csv(path_or_buf='dataset{}{}.csv'.format(i, i), index=False)
         os.remove('dataset{}.csv'.format(i))
-
 
 def one_hot_encoding():
     # 函如其名
@@ -1407,7 +1400,6 @@ def offline_score():
             total+=abs(float((shop_day_pay.ix[i,date_to_string(d)]-outcome.ix[i-1,j+1])/float((shop_day_pay.ix[i,date_to_string(d)]+outcome.ix[i-1,j+1]))))
             d+=delta
     print float(total/28000)
-
 
 if __name__ == '__main__':
     create_dataset()
