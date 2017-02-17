@@ -651,8 +651,9 @@ def create_dataset():
             'weather'], dataset['weekday'], dataset['holiday']
         dataset = pd.concat([dataset.ix[:, :-1], t1, t2,
                              t3, t4, dataset.ix[:, -1]], axis=1)
-        dataset.to_csv(path_or_buf='dataset{}{}.csv'.format(i, i), index=False)
-        os.remove('dataset{}.csv'.format(i))
+        dataset.to_csv(path_or_buf='datasetm{}{}.csv'.format(i, i), index=False)
+    for i in range(1, 15):
+        os.rename('datasetm{}{}.csv'.format(i, i),'dataset{}.csv'.format(i))
 
 def one_hot_encoding():
     # 函如其名
@@ -683,7 +684,8 @@ def train():
             n_estimators=200,
             random_state=0,
             n_jobs=-1,
-            max_depth=20,
+            max_depth=6,
+            max_leaf_nodes=
             max_features=0.5,
             oob_score=True,criterion='mae')  # oob_score代替交叉验证
         forest = forest.fit(x, y)
@@ -1020,9 +1022,9 @@ def create_predictset():
         del dataset['city_level'], dataset[
             'weather'], dataset['weekday'], dataset['holiday']
         dataset = pd.concat([dataset.ix[:, :], t1, t2, t3, t4], axis=1)
-        dataset.to_csv(
-            path_or_buf='predictset{}{}.csv'.format(
-                i, i), index=False)
+        dataset.to_csv(path_or_buf='datasetm{}{}.csv'.format(i, i), index=False)
+        for i in range(1, 15):
+            os.rename('datasetm{}{}.csv'.format(i, i), 'dataset{}.csv'.format(i))
 
 def outcome():
     #线上答案生成
