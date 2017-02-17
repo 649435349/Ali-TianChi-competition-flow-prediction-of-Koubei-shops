@@ -643,6 +643,7 @@ def create_dataset():
     # one hot coding
     for i in range(1, 15):
         dataset = pd.read_csv('dataset{}.csv'.format(i))
+        os.remove('dataset{}.csv'.format(i))
         t1 = pd.get_dummies(dataset['city_level'], prefix='city_level')
         t2 = pd.get_dummies(dataset['weather'], prefix='weather')
         t3 = pd.get_dummies(dataset['weekday'], prefix='weekday')
@@ -651,10 +652,8 @@ def create_dataset():
             'weather'], dataset['weekday'], dataset['holiday']
         dataset = pd.concat([dataset.ix[:, :-1], t1, t2,
                              t3, t4, dataset.ix[:, -1]], axis=1)
-        dataset.to_csv(path_or_buf='datasetm{}{}.csv'.format(i, i), index=False)
-        os.remove('dataset{}.csv'.format(i))
-    for i in range(1, 15):
-        os.rename('datasetm{}{}.csv'.format(i, i),'dataset{}.csv'.format(i))
+        dataset.to_csv(path_or_buf='dataset{}.csv'.format( i), index=False)
+
 
 def one_hot_encoding():
     # 函如其名
@@ -699,7 +698,7 @@ def train():
             print feat_labels[indices[f]], importances[indices[f]]
 
         # 保存模型
-        os.chdir('../model/0217/')
+        os.chdir('../model/0216/')
         joblib.dump(forest, 'rf_day{}.model'.format(i))
         os.chdir('../')
         os.chdir('../')
@@ -963,8 +962,9 @@ def create_predictset():
                 res.insert(1, date_to_string(d + (q - 1) * delta))  # 改
                 writer.writerow(res)
     # one hot coding
-    for i in range(1, 8):
+    for i in range(1, 15):
         dataset = pd.read_csv('predictset{}.csv'.format(i))
+        os.remove('predictset{}.csv'.format(i))
         t1 = pd.get_dummies(dataset['city_level'], prefix='city_level')
         t2 = pd.get_dummies(dataset['weather'], prefix='weather')
         #注意天气可能出现
@@ -1023,9 +1023,7 @@ def create_predictset():
         del dataset['city_level'], dataset[
             'weather'], dataset['weekday'], dataset['holiday']
         dataset = pd.concat([dataset.ix[:, :], t1, t2, t3, t4], axis=1)
-        dataset.to_csv(path_or_buf='datasetm{}{}.csv'.format(i, i), index=False)
-        for i in range(1, 15):
-            os.rename('datasetm{}{}.csv'.format(i, i), 'dataset{}.csv'.format(i))
+        dataset.to_csv(path_or_buf='predictset{}.csv'.format(i), index=False)
 
 def outcome():
     #线上答案生成
@@ -1068,7 +1066,7 @@ def create_offline_predictset():
         'shop_info_modified.csv').set_index('shop_id')
     shop_average = pd.read_csv('shop_average.csv').set_index('shop_id')
     os.chdir('./model/0216/offline/')
-    for q in range(1, 8):
+    for q in range(1, 15):
         with open('predictset{}.csv'.format(q), 'w+') as f:
             writer = csv.writer(f)
             writer.writerow(['shop_id',
@@ -1306,8 +1304,9 @@ def create_offline_predictset():
                 res.insert(1, date_to_string(d + (q - 1) * delta))  # 改
                 writer.writerow(res)
     # one hot coding
-    for i in range(1, 8):
+    for i in range(1, 15):
         dataset = pd.read_csv('predictset{}.csv'.format(i))
+        os.remove('predictset{}.csv'.format(i))
         t1 = pd.get_dummies(dataset['city_level'], prefix='city_level')
         t2 = pd.get_dummies(dataset['weather'], prefix='weather')
         #注意天气可能出现
@@ -1367,11 +1366,11 @@ def create_offline_predictset():
             'weather'], dataset['weekday'], dataset['holiday']
         dataset = pd.concat([dataset.ix[:, :], t1, t2, t3, t4], axis=1)
         dataset.to_csv(
-            path_or_buf='predictset{}{}.csv'.format(
+            path_or_buf='predictset{}.csv'.format(
                 i, i), index=False)
 
 def offline_outcome():
-    os.chdir('../dataset/model/0217/')
+    os.chdir('../dataset/model/0216/')
     res = []
     for i in range(1, 2001):
         res.append([i])
@@ -1392,7 +1391,7 @@ def offline_outcome():
 def offline_score():
     os.chdir('../dataset/')
     shop_day_pay=pd.read_csv('shop_day_pay.csv').set_index('shop_id')
-    os.chdir('./model/0217/offline/')
+    os.chdir('./model/0216/offline/')
     outcome=pd.read_csv('outcome.csv',header=None)
     total=0.0
     date=datetime.date(2016,10,18)
@@ -1405,4 +1404,6 @@ def offline_score():
     print float(total/28000)
 
 if __name__ == '__main__':
-    train()
+    offline_outcome()
+    offline_score()
+
