@@ -686,7 +686,7 @@ def train():
             n_jobs=-1,
             max_depth=6,
             max_features=0.1,
-            oob_score=True,criterion='mae')  # oob_score代替交叉验证
+            oob_score=True,criterion='mse')  # oob_score代替交叉验证
         forest = forest.fit(x, y)
         print forest.score(x, y)
 
