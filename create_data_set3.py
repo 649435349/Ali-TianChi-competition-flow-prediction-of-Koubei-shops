@@ -1370,11 +1370,11 @@ def create_offline_predictset():
                 i, i), index=False)
 
 def offline_outcome():
-    os.chdir('../dataset/model/0216/')
+    os.chdir('../dataset/model/0217/')
     res = []
     for i in range(1, 2001):
         res.append([i])
-    for i in range(1, 8):
+    for i in range(1, 15):
         forest=joblib.load('rf_day{}.model'.format(i))
         os.chdir('./offline/')
         t = pd.read_csv('predictset{}{}.csv'.format(i, i)).ix[:,2:].values
@@ -1391,7 +1391,7 @@ def offline_outcome():
 def offline_score():
     os.chdir('../dataset/')
     shop_day_pay=pd.read_csv('shop_day_pay.csv').set_index('shop_id')
-    os.chdir('./model/0216/offline/')
+    os.chdir('./model/0217/offline/')
     outcome=pd.read_csv('outcome.csv',header=None)
     total=0.0
     date=datetime.date(2016,10,18)
