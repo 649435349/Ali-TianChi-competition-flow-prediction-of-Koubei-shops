@@ -386,7 +386,7 @@ def create_dataset():
         'shop_info_modified.csv').set_index('shop_id')
     shop_average = pd.read_csv('shop_average.csv').set_index('shop_id')
     os.chdir('./train/')
-    for q in range(1, 8):
+    for q in range(1, 15):
         with open('dataset{}.csv'.format(q), 'w+') as f:  # 改
             writer = csv.writer(f)
             writer.writerow(['shop_id',
@@ -534,6 +534,11 @@ def create_dataset():
                 begin_date = string_to_date(
                     shop_first_no0_date.ix[
                         i, 'first_no0_view_date'])
+                #强制从2016-07-01开始，减小数据凉并且认为前面的数据不重要
+                if begin_date>datetime.date(2016,7,1):
+                    begin_date=begin_date
+                else:
+                    begin_date = datetime.date(2016, 7, 1)
                 end_date = datetime.date(2016, 10, 19 - q)  # 改
                 delta = datetime.timedelta(days=1)
                 gap = (end_date - begin_date).days
@@ -634,7 +639,7 @@ def create_dataset():
                     begin_date += delta
                     writer.writerow(res)
     # one hot coding
-    for i in range(1, 8):
+    for i in range(1, 15):
         dataset = pd.read_csv('dataset{}.csv'.format(i))
         t1 = pd.get_dummies(dataset['city_level'], prefix='city_level')
         t2 = pd.get_dummies(dataset['weather'], prefix='weather')
@@ -671,7 +676,6 @@ def one_hot_encoding():
                              t3, t4, dataset.ix[:, -1]], axis=1)
         dataset.to_csv(path_or_buf='dataset{}{}.csv'.format(i, i), index=False)
 
-
 def train():
     os.chdir('../dataset/')
     for i in range(1, 8):
@@ -703,7 +707,6 @@ def train():
         os.chdir('../model/')
         joblib.dump(forest, 'rf_day{}.model'.format(i))
         os.chdir('../')
-
 
 def create_predictset():
     '''
@@ -1407,4 +1410,4 @@ def offline_score():
 
 
 if __name__ == '__main__':
-    offline_score()
+    create_dataset()
