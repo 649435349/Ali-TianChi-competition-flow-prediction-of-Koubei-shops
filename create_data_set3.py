@@ -675,17 +675,17 @@ def train():
     for i in range(1, 15):
         # 导入数据
         os.chdir('./train/')
-        t = pd.read_csv('dataset{}.csv'.format(i, i))
+        t = pd.read_csv('dataset{}.csv'.format(i))
 
         # 用模型训练
         feat_labels = t.columns[2:-1]
         x, y = t.ix[:, 2:-1].values, t.ix[:, -1].values
         forest = RandomForestRegressor(
-            n_estimators=200,
+            n_estimators=100,
             random_state=0,
             n_jobs=-1,
             max_depth=6,
-            max_features=0.5,
+            max_features=0.1,
             oob_score=True,criterion='mae')  # oob_score代替交叉验证
         forest = forest.fit(x, y)
         print forest.score(x, y)
