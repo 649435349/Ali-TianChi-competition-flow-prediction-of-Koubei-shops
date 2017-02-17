@@ -1377,7 +1377,7 @@ def offline_outcome():
     for i in range(1, 15):
         forest=joblib.load('rf_day{}.model'.format(i))
         os.chdir('./offline/')
-        t = pd.read_csv('predictset{}{}.csv'.format(i, i)).ix[:,2:].values
+        t = pd.read_csv('predictset{}.csv'.format(i, i)).ix[:,2:].values
         os.chdir('../')
         tt = list(forest.predict(t))
         for i in range(2000):
