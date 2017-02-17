@@ -725,7 +725,7 @@ def create_predictset():
         'shop_info_modified.csv').set_index('shop_id')
     shop_average = pd.read_csv('shop_average.csv').set_index('shop_id')
     os.chdir('./model/0216/online/')
-    for q in range(1, 8):
+    for q in range(1, 15):
         with open('predictset{}.csv'.format(q), 'w+') as f:
             writer = csv.writer(f)
             writer.writerow(['shop_id',
@@ -1405,4 +1405,4 @@ def offline_score():
     print float(total/28000)
 
 if __name__ == '__main__':
-    offline_outcome()
+    train()
