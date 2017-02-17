@@ -672,7 +672,7 @@ def one_hot_encoding():
 
 def train():
     os.chdir('../dataset/')
-    for i in range(1, 8):
+    for i in range(1, 15):
         # 导入数据
         os.chdir('./train/')
         t = pd.read_csv('dataset{}{}.csv'.format(i, i))
@@ -685,7 +685,6 @@ def train():
             random_state=0,
             n_jobs=-1,
             max_depth=6,
-            max_leaf_nodes=
             max_features=0.5,
             oob_score=True,criterion='mae')  # oob_score代替交叉验证
         forest = forest.fit(x, y)
@@ -699,8 +698,9 @@ def train():
             print feat_labels[indices[f]], importances[indices[f]]
 
         # 保存模型
-        os.chdir('../model/')
+        os.chdir('../model/0217/')
         joblib.dump(forest, 'rf_day{}.model'.format(i))
+        os.chdir('../')
         os.chdir('../')
 
 def create_predictset():
