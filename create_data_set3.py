@@ -675,7 +675,7 @@ def train():
     for i in range(1, 15):
         # 导入数据
         os.chdir('./train/')
-        t = pd.read_csv('dataset{}{}.csv'.format(i, i))
+        t = pd.read_csv('dataset{}.csv'.format(i, i))
 
         # 用模型训练
         feat_labels = t.columns[2:-1]
