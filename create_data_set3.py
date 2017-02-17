@@ -1404,4 +1404,4 @@ def offline_score():
     print float(total/28000)
 
 if __name__ == '__main__':
-    train()
+    offline_outcome()
