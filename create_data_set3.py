@@ -12,6 +12,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold, cross_val_score
 from sklearn.externals import joblib
+import xgboost as xgb
 import pandas as pd
 import numpy as np
 
@@ -22,7 +23,6 @@ def change(item):
     if len(item) < 2:
         item = '0' + item
     return item
-
 
 def mysqll():
     # 插入天气数据
@@ -43,7 +43,6 @@ def mysqll():
             conn.commit()
     cur.close()
     conn.close()
-
 
 def create_tianqi():
     # 创建每个商家所在城市每一天的天气数据
@@ -126,10 +125,8 @@ def create_tianqi():
     cur.close()
     conn.close()
 
-
 def my_error(Exception):
     pass
-
 
 def create_tianqi2():
     # 创建每个商家所在城市每一天的风力等级
@@ -204,7 +201,6 @@ def create_tianqi2():
     cur.close()
     conn.close()
 
-
 def get_averaget():
     # 为了建平均温度的表
     os.chdir('../dataset/')
@@ -224,7 +220,6 @@ def get_averaget():
                 else:
                     res.append((int(t1[j]) + int(t2[j])) / 2.0)
             writer.writerow(res)
-
 
 def get_jiejiari():
     # 改善节假日
@@ -249,7 +244,6 @@ def get_jiejiari():
             date += delta
         writer.writerow(res)
 
-
 def get_weekday():
     # 得到每天是星期几
     os.chdir('../dataset/')
@@ -269,7 +263,6 @@ def get_weekday():
             res.append(date.weekday() + 1)
             date += delta
         writer.writerow(res)
-
 
 def get_average_pay():
     # 得到每天的所有商家的支付和浏览人数的平均数
@@ -299,7 +292,6 @@ def get_average_pay():
             date += delta
         writer.writerow(res)
 
-
 def get_first_no0_date():
     # 得到每个商家不是0的第一天的日期，支付和浏览
     os.chdir('../dataset/')
@@ -321,7 +313,6 @@ def get_first_no0_date():
             res.append(datef2[index])
             writer.writerow(res)
 
-
 def analyse():
     # 分析用
     os.chdir('../dataset/')
@@ -333,7 +324,6 @@ def analyse():
             date = string_to_date(i[2])
             res.append(datetime.date(2016, 11, 1) - date)
         print max(res)
-
 
 def create_shop_average():
     # 输出每个商家的平均浏览和平均
@@ -356,19 +346,30 @@ def create_shop_average():
             res.append(shop_day_view.ix[i, (-days):].mean())
             writer.writerow(res)
 
-
 def string_to_date(s):
     l = re.findall(r'\d+', s)
     return datetime.date(year=int(l[0]), month=int(l[1]), day=int(l[2]))
-
 
 def date_to_string(date):
     return '{}-{}-{}'.format(change(date.year),
                              change(date.month), change(date.day))
 
+def one_hot_encoding():
+    # 函如其名
+    os.chdir('../dataset/train/')
+    for i in range(1, 8):
+        dataset = pd.read_csv('dataset{}.csv'.format(i))
+        t1 = pd.get_dummies(dataset['city_level'], prefix='city_level')
+        t2 = pd.get_dummies(dataset['weather'], prefix='weather')
+        t3 = pd.get_dummies(dataset['weekday'], prefix='weekday')
+        t4 = pd.get_dummies(dataset['holiday'], prefix='holiday')
+        del dataset['city_level'], dataset[
+            'weather'], dataset['weekday'], dataset['holiday']
+        dataset = pd.concat([dataset.ix[:, :-1], t1, t2,
+                             t3, t4, dataset.ix[:, -1]], axis=1)
+        dataset.to_csv(path_or_buf='dataset{}{}.csv'.format(i, i), index=False)
 
-def create_dataset():
-
+def create_dataset(line=None):
     os.chdir('../dataset/')
     all_shop_day_average_pay = pd.read_csv('all_shop_day_average_pay.csv')
     all_shop_day_average_view = pd.read_csv('all_shop_day_average_view.csv')
@@ -386,12 +387,16 @@ def create_dataset():
     shop_info_modified = pd.read_csv(
         'shop_info_modified.csv').set_index('shop_id')
     shop_average = pd.read_csv('shop_average.csv').set_index('shop_id')
-    os.chdir('./train/')
-    for q in range(1, 15):
+    if line=='online':
+        os.chdir('./train/online/')
+    else:
+        os.chdir('./train/offline/')
+    for q in range(1, 8):
         with open('dataset{}.csv'.format(q), 'w+') as f:  # 改
             writer = csv.writer(f)
             writer.writerow(['shop_id',
                              'day_date',
+                             'day_gap',
                              'city_level',
                              'location_id',
                              'per_pay',
@@ -534,13 +539,40 @@ def create_dataset():
                     list(shop_average.ix[i, :]) + [zz / z]
                 begin_date = string_to_date(
                     shop_first_no0_date.ix[
-                        i, 'first_no0_view_date'])
-                #强制从2016-07-01开始，减小数据凉并且认为前面的数据不重要
-                if begin_date>datetime.date(2016,7,1):
-                    begin_date=begin_date
+                        i, 'first_no0_pay_date'])
+                #pay一般在有数据的view之前
+                if begin_date<datetime.date(2016,2,1):
+                    begin_date=datetime.date(2016,2,1)
+                #不修改时间
+                if line == 'online':
+                    kkk = 19
+                    end_date = datetime.date(2016, 10, kkk - q)  # 改
                 else:
-                    begin_date = datetime.date(2016, 7, 1)
-                end_date = datetime.date(2016, 10, 19 - q)  # 改
+                    kkk = 5
+                    if kkk - q > 0:
+                        end_date = datetime.date(2016, 10, kkk - q)  # 改
+                    else:
+                        end_date = datetime.date(2016, 9, 30 + kkk - q)  # 改
+                '''
+                #强制从2016-07-01开始，减小数据量并且认为前面的数据不重要
+                if line=='online':
+                    if begin_date > datetime.date(2016, 7, 1):
+                        begin_date = begin_date
+                    else:
+                        begin_date = datetime.date(2016, 7, 1)
+                    kkk=19
+                    end_date = datetime.date(2016, 10, kkk - q)  # 改
+                else:
+                    if begin_date > datetime.date(2016, 6, 17):
+                        begin_date = begin_date
+                    else:
+                        begin_date = datetime.date(2016, 6, 17)
+                    kkk=5
+                    if kkk-q>0:
+                        end_date = datetime.date(2016, 10, kkk - q)  # 改
+                    else:
+                        end_date = datetime.date(2016, 9, 30+kkk-q)  # 改
+                '''
                 delta = datetime.timedelta(days=1)
                 gap = (end_date - begin_date).days
                 for j in range(gap):
@@ -637,11 +669,11 @@ def create_dataset():
                     res.append(shop_day_pay.ix[
                                i, date_to_string(d + (q - 1) * delta)])  # 改
                     res.insert(1, date_to_string(d + (q - 1) * delta))  # 改
+                    res.insert(2,((d + (q - 1) * delta)-string_to_date(shop_first_no0_date.ix[i,'first_no0_pay_date'])).days)
                     begin_date += delta
                     writer.writerow(res)
-
     # one hot coding
-    for i in range(1, 15):
+    for i in range(1, 8):
         dataset = pd.read_csv('dataset{}.csv'.format(i))
         os.remove('dataset{}.csv'.format(i))
         t1 = pd.get_dummies(dataset['city_level'], prefix='city_level')
@@ -653,57 +685,9 @@ def create_dataset():
         dataset = pd.concat([dataset.ix[:, :-1], t1, t2,
                              t3, t4, dataset.ix[:, -1]], axis=1)
         dataset.to_csv(path_or_buf='dataset{}.csv'.format( i), index=False)
+    os.chdir('/home/fengyufei/PycharmProjects/competition/code')
 
-
-def one_hot_encoding():
-    # 函如其名
-    os.chdir('../dataset/train/')
-    for i in range(1, 8):
-        dataset = pd.read_csv('dataset{}.csv'.format(i))
-        t1 = pd.get_dummies(dataset['city_level'], prefix='city_level')
-        t2 = pd.get_dummies(dataset['weather'], prefix='weather')
-        t3 = pd.get_dummies(dataset['weekday'], prefix='weekday')
-        t4 = pd.get_dummies(dataset['holiday'], prefix='holiday')
-        del dataset['city_level'], dataset[
-            'weather'], dataset['weekday'], dataset['holiday']
-        dataset = pd.concat([dataset.ix[:, :-1], t1, t2,
-                             t3, t4, dataset.ix[:, -1]], axis=1)
-        dataset.to_csv(path_or_buf='dataset{}{}.csv'.format(i, i), index=False)
-
-def train():
-    os.chdir('../dataset/')
-    for i in range(1, 15):
-        # 导入数据
-        os.chdir('./train/')
-        t = pd.read_csv('dataset{}.csv'.format(i))
-
-        # 用模型训练
-        feat_labels = t.columns[2:-1]
-        x, y = t.ix[:, 2:-1].values, t.ix[:, -1].values
-        forest = RandomForestRegressor(
-            n_estimators=100,
-            random_state=0,
-            n_jobs=-1,
-            max_depth=8,
-            max_features=0.4,
-            oob_score=True,criterion='mse')  # oob_score代替交叉验证
-        forest = forest.fit(x, y)
-        print forest.score(x, y)
-
-        # 查看特征重要性
-        print 'forest:', i
-        importances = forest.feature_importances_
-        indices = np.argsort(importances)[::-1]
-        for f in range(x.shape[1]):
-            print feat_labels[indices[f]], importances[indices[f]]
-
-        # 保存模型
-        os.chdir('../model/0216/')
-        joblib.dump(forest, 'rf_day{}.model'.format(i))
-        os.chdir('../')
-        os.chdir('../')
-
-def create_predictset():
+def create_predictset(line=None):
     '''
     # 用于获得预测的数据
     '''
@@ -719,16 +703,20 @@ def create_predictset():
     shop_day_view = pd.read_csv('shop_day_view.csv').set_index('shop_id')
     shop_day_weather = pd.read_csv('shop_day_weather.csv').set_index('shop_id')
     shop_day_weekday = pd.read_csv('shop_day_weekday.csv')
-    #shop_first_no0_date = pd.read_csv('shop_first_no0_date.csv').set_index('shop_id')
+    shop_first_no0_date = pd.read_csv('shop_first_no0_date.csv').set_index('shop_id')
     shop_info_modified = pd.read_csv(
         'shop_info_modified.csv').set_index('shop_id')
     shop_average = pd.read_csv('shop_average.csv').set_index('shop_id')
-    os.chdir('./model/0216/online/')
+    if line=='online':
+        os.chdir('./model/0216/online/')
+    else:
+        os.chdir('./model/0216/offline/')
     for q in range(1, 15):
         with open('predictset{}.csv'.format(q), 'w+') as f:
             writer = csv.writer(f)
             writer.writerow(['shop_id',
                              'day_date',
+                             'day_gap',
                              'city_level',
                              'location_id',
                              'per_pay',
@@ -868,7 +856,11 @@ def create_predictset():
                     zz += 1
                 basic = [i] + list(shop_info_modified.ix[i, :]) + \
                     list(shop_average.ix[i, :]) + [zz / z]
-                begin_date = datetime.date(2016, 10, 18)
+                if line=='online':
+                    kkk=18
+                elif line=='offline':
+                    kkk=4
+                begin_date = datetime.date(2016, 10, kkk)
                 delta = datetime.timedelta(days=1)
                 res = copy.deepcopy(basic)
                 d = begin_date + (13 + q) * delta  # 改
@@ -960,14 +952,15 @@ def create_predictset():
                     else:
                         res.append(n + 1)
                 res.insert(1, date_to_string(d + (q - 1) * delta))  # 改
+                res.insert(2,((d + (q - 1) * delta)-string_to_date(shop_first_no0_date.ix[i,'first_no0_pay_date'])).days)
                 writer.writerow(res)
     # one hot coding
-    for i in range(1, 15):
+    for i in range(1, 14):
         dataset = pd.read_csv('predictset{}.csv'.format(i))
         os.remove('predictset{}.csv'.format(i))
         t1 = pd.get_dummies(dataset['city_level'], prefix='city_level')
         t2 = pd.get_dummies(dataset['weather'], prefix='weather')
-        #注意天气可能出现
+        #注意天气可能出现问题
         t33 = pd.get_dummies(dataset['weekday'], prefix='weekday')
         weekday = int(dataset.ix[1,'weekday'])
         if weekday!=1 and weekday!=7:
@@ -1024,386 +1017,163 @@ def create_predictset():
             'weather'], dataset['weekday'], dataset['holiday']
         dataset = pd.concat([dataset.ix[:, :], t1, t2, t3, t4], axis=1)
         dataset.to_csv(path_or_buf='predictset{}.csv'.format(i), index=False)
+    os.chdir('/home/fengyufei/PycharmProjects/competition/code')
 
-def outcome():
-    #线上答案生成
-    os.chdir('../dataset/model/0216/')
-    res = []
-    for i in range(1, 2001):
-        res.append([i])
-    for i in range(1, 8):
-        forest=joblib.load('rf_day{}.model'.format(i))
-        os.chdir('./online/')
-        t = pd.read_csv('predictset{}{}.csv'.format(i, i)).ix[:,2:].values
-        os.chdir('../')
-        tt = list(forest.predict(t))
-        for i in range(2000):
-            res[i].append(int(round(float(tt[i]))))
-    os.chdir('./online/')
-    with open('outcome.csv','w+') as f:
-        writer = csv.writer(f)
-        for i in range(2000):
-            writer.writerow(res[i] + res[i][1:])
-
-def create_offline_predictset():
-    '''
-    # 用于获得线下预测的数据
-    '''
+def train(line=None,model=None,max_depth=None,eta=0.3,min_child_weight=None):
     os.chdir('../dataset/')
-    all_shop_day_average_pay = pd.read_csv('all_shop_day_average_pay.csv')
-    all_shop_day_average_view = pd.read_csv('all_shop_day_average_view.csv')
-    shop_day_averaget = pd.read_csv(
-        'shop_day_averaget.csv').set_index('shop_id')
-    shop_day_holiday = pd.read_csv('shop_day_holiday.csv')
-    shop_day_lowt = pd.read_csv('shop_day_lowt.csv').set_index('shop_id')
-    shop_day_pay = pd.read_csv('shop_day_pay.csv').set_index('shop_id')
-    shop_day_upt = pd.read_csv('shop_day_upt.csv').set_index('shop_id')
-    shop_day_view = pd.read_csv('shop_day_view.csv').set_index('shop_id')
-    shop_day_weather = pd.read_csv('shop_day_weather.csv').set_index('shop_id')
-    shop_day_weekday = pd.read_csv('shop_day_weekday.csv')
-    #shop_first_no0_date = pd.read_csv('shop_first_no0_date.csv').set_index('shop_id')
-    shop_info_modified = pd.read_csv(
-        'shop_info_modified.csv').set_index('shop_id')
-    shop_average = pd.read_csv('shop_average.csv').set_index('shop_id')
-    os.chdir('./model/0216/offline/')
-    for q in range(1, 15):
-        with open('predictset{}.csv'.format(q), 'w+') as f:
-            writer = csv.writer(f)
-            writer.writerow(['shop_id',
-                             'day_date',
-                             'city_level',
-                             'location_id',
-                             'per_pay',
-                             'score',
-                             'comment_cnt',
-                             'shop_level',
-                             'cate_1_name_chaoshibianlidian',
-                             'cate_1_name_meishi',
-                             'cate_1_name_others',
-                             'cate_2_name_bianlidian',
-                             'cate_2_name_chaoshi',
-                             'cate_2_name_hongbeigaodian',
-                             'cate_2_name_huoguo',
-                             'cate_2_name_kuaican',
-                             'cate_2_name_others',
-                             'cate_2_name_qitameishi',
-                             'cate_2_name_xiaochi',
-                             'cate_2_name_xiuxianchayin',
-                             'cate_2_name_xiuxianshipin',
-                             'cate_2_name_zhongcan',
-                             'average_pay',
-                             'average_view',
-                             'average_divide',
-                             'upt',
-                             'lowt',
-                             'averaget',
-                             'weather',
-                             'weekday',
-                             'holiday',
-                             'before_day_pay_14',
-                             'before_day_pay_13',
-                             'before_day_pay_12',
-                             'before_day_pay_11',
-                             'before_day_pay_10',
-                             'before_day_pay_9',
-                             'before_day_pay_8',
-                             'before_day_pay_7',
-                             'before_day_pay_6',
-                             'before_day_pay_5',
-                             'before_day_pay_4',
-                             'before_day_pay_3',
-                             'before_day_pay_2',
-                             'before_day_pay_1',
-                             'before_day_pay_14_average',
-                             'before_day_pay_7_average',
-                             'before_day_pay_3_average',
-                             'before_day_view_14',
-                             'before_day_view_13',
-                             'before_day_view_12',
-                             'before_day_view_11',
-                             'before_day_view_10',
-                             'before_day_view_9',
-                             'before_day_view_8',
-                             'before_day_view_7',
-                             'before_day_view_6',
-                             'before_day_view_5',
-                             'before_day_view_4',
-                             'before_day_view_3',
-                             'before_day_view_2',
-                             'before_day_view_1',
-                             'before_day_view_14_average',
-                             'before_day_view_7_average',
-                             'before_day_view_3_average',
-                             'before_divide_14',
-                             'before_divide_13',
-                             'before_divide_12',
-                             'before_divide_11',
-                             'before_divide_10',
-                             'before_divide_9',
-                             'before_divide_8',
-                             'before_divide_7',
-                             'before_divide_6',
-                             'before_divide_5',
-                             'before_divide_4',
-                             'before_divide_3',
-                             'before_divide_2',
-                             'before_divide_1',
-                             'before_14_average_divide',
-                             'before_7_average_divide',
-                             'before_3_average_divide',
-                             'before_all_average_pay_14',
-                             'before_all_average_pay_13',
-                             'before_all_average_pay_12',
-                             'before_all_average_pay_11',
-                             'before_all_average_pay_10',
-                             'before_all_average_pay_9',
-                             'before_all_average_pay_8',
-                             'before_all_average_pay_7',
-                             'before_all_average_pay_6',
-                             'before_all_average_pay_5',
-                             'before_all_average_pay_4',
-                             'before_all_average_pay_3',
-                             'before_all_average_pay_2',
-                             'before_all_average_pay_1',
-                             'before_all_average_pay_average_14',
-                             'before_all_average_pay_average_7',
-                             'before_all_average_pay_average_3',
-                             'before_all_average_view_14',
-                             'before_all_average_view_13',
-                             'before_all_average_view_12',
-                             'before_all_average_view_11',
-                             'before_all_average_view_10',
-                             'before_all_average_view_9',
-                             'before_all_average_view_8',
-                             'before_all_average_view_7',
-                             'before_all_average_view_6',
-                             'before_all_average_view_5',
-                             'before_all_average_view_4',
-                             'before_all_average_view_3',
-                             'before_all_average_view_2',
-                             'before_all_average_view_1',
-                             'before_all_average_view_average_14',
-                             'before_all_average_view_average_7',
-                             'before_all_average_view_average_3',
-                             'before_all_divide_14',
-                             'before_all_divide_13',
-                             'before_all_divide_12',
-                             'before_all_divide_11',
-                             'before_all_divide_10',
-                             'before_all_divide_9',
-                             'before_all_divide_8',
-                             'before_all_divide_7',
-                             'before_all_divide_6',
-                             'before_all_divide_5',
-                             'before_all_divide_4',
-                             'before_all_divide_3',
-                             'before_all_divide_2',
-                             'before_all_divide_1',
-                             'before_all_14_average_divide',
-                             'before_all_7_average_divide',
-                             'before_all_3_average_divide'])
-            for i in range(1, 2001):
-                z = float(shop_average.ix[i, 'average_view'])
-                zz = float(shop_average.ix[i, 'average_pay'])
-                if z == 0:
-                    z = 1
-                    zz += 1
-                basic = [i] + list(shop_info_modified.ix[i, :]) + \
-                    list(shop_average.ix[i, :]) + [zz / z]
-                begin_date = datetime.date(2016, 10, 4)
-                delta = datetime.timedelta(days=1)
-                res = copy.deepcopy(basic)
-                d = begin_date + (13 + q) * delta  # 改
-                str_d = date_to_string(d)
-                res.append(shop_day_upt.ix[i, str_d])
-                res.append(shop_day_lowt.ix[i, str_d])
-                res.append(shop_day_averaget.ix[i, str_d])
-                res.append(shop_day_weather.ix[i, str_d])
-                res.append(shop_day_weekday.ix[0, str_d])
-                res.append(shop_day_holiday.ix[0, str_d])
-                # 插入此商家前14天的信息
-                l1 = []
-                l2 = []
-                d = begin_date
-                for m in range(14):
-                    res.append(shop_day_pay.ix[i, date_to_string(d)])
-                    l1.append(shop_day_pay.ix[i, date_to_string(d)])
-                    d += delta
-                tmp = sum(res[-14:]) / 14.0
-                res.append(tmp)
-                l1.append(tmp)
-                tmp = sum(res[-8:-1]) / 7.0
-                res.append(tmp)
-                l1.append(tmp)
-                tmp = sum(res[-5:-2]) / 3.0
-                res.append(tmp)
-                l1.append(tmp)
-                d = begin_date
-                for m in range(14):
-                    res.append(shop_day_view.ix[i, date_to_string(d)])
-                    l2.append(shop_day_view.ix[i, date_to_string(d)])
-                    d += delta
-                tmp = sum(res[-14:]) / 14.0
-                res.append(tmp)
-                l2.append(tmp)
-                tmp = sum(res[-8:-1]) / 7.0
-                res.append(tmp)
-                l2.append(tmp)
-                tmp = sum(res[-5:-2]) / 3.0
-                res.append(tmp)
-                l2.append(tmp)
-                for m, n in enumerate(l1):
-                    if l2[m] != 0:
-                        res.append(n / float(l2[m]))
-                    else:
-                        res.append(n + 1)
-                # 插入所有商家的平均信息
-                l1 = []
-                l2 = []
-                d = begin_date
-                for m in range(14):
-                    res.append(
-                        all_shop_day_average_pay.ix[
-                            0, date_to_string(d)])
-                    l1.append(
-                        all_shop_day_average_pay.ix[
-                            0, date_to_string(d)])
-                    d += delta
-                tmp = sum(res[-14:]) / 14.0
-                res.append(tmp)
-                l1.append(tmp)
-                tmp = sum(res[-8:-1]) / 7.0
-                res.append(tmp)
-                l1.append(tmp)
-                tmp = sum(res[-5:-2]) / 3.0
-                res.append(tmp)
-                l1.append(tmp)
-                d = begin_date
-                for m in range(14):
-                    res.append(
-                        all_shop_day_average_view.ix[
-                            0, date_to_string(d)])
-                    l2.append(
-                        all_shop_day_average_view.ix[
-                            0, date_to_string(d)])
-                    d += delta
-                tmp = sum(res[-14:]) / 14.0
-                res.append(tmp)
-                l2.append(tmp)
-                tmp = sum(res[-8:-1]) / 7.0
-                res.append(tmp)
-                l2.append(tmp)
-                tmp = sum(res[-5:-2]) / 3.0
-                res.append(tmp)
-                l2.append(tmp)
-                for m, n in enumerate(l1):
-                    if l2[m] != 0:
-                        res.append(n / float(l2[m]))
-                    else:
-                        res.append(n + 1)
-                res.insert(1, date_to_string(d + (q - 1) * delta))  # 改
-                writer.writerow(res)
-    # one hot coding
-    for i in range(1, 15):
-        dataset = pd.read_csv('predictset{}.csv'.format(i))
-        os.remove('predictset{}.csv'.format(i))
-        t1 = pd.get_dummies(dataset['city_level'], prefix='city_level')
-        t2 = pd.get_dummies(dataset['weather'], prefix='weather')
-        #注意天气可能出现
-        t33 = pd.get_dummies(dataset['weekday'], prefix='weekday')
-        weekday = int(dataset.ix[1,'weekday'])
-        if weekday!=1 and weekday!=7:
-            k1 = pd.DataFrame([[0] * (weekday-1)] * 2000,
-                             columns=['weekday_{}'.format(j) for j in range(1,
-                                                                            weekday)])
-            k2=pd.DataFrame([[0] * (7 - weekday)] * 2000,
-                                         columns=['weekday_{}'.format(j) for j in range(weekday + 1,
-                                                                                        8)])
-            t3 = pd.concat([k1,
-                            t33,
-                            k2],
-                           axis=1)
-        elif weekday==1:
-            k=pd.DataFrame([[0] * (7 - weekday)] * 2000,
-                                         columns=['weekday_{}'.format(j) for j in range(weekday + 1,
-                                                                                        8)])
-            t3 = pd.concat([t33,
-                            k],
-                           axis=1)
-        else:
-            k = pd.DataFrame([[0] * (weekday - 1)] * 2000,
-                                         columns=['weekday_{}'.format(j) for j in range(1,
-                                                                                        weekday)])
-            t3 = pd.concat([k,
-                            t33],
-                           axis=1)
-        t44 = pd.get_dummies(dataset['holiday'], prefix='holiday')
-        holiday = int(dataset.ix[1,'holiday'])
-        if holiday==0:
-            k=pd.DataFrame([[0] * (2 - holiday)] * 2000,
-                                         columns=['holiday_{}'.format(j) for j in range(holiday + 1,
-                                                                                        3)])
-            t4 = pd.concat([t44,
-                            k],
-                           axis=1)
-        elif holiday==1:
-            k1=pd.DataFrame([[0] * (holiday)] * 2000,
-                                         columns=['holiday_{}'.format(j) for j in range(holiday)])
-            k2=pd.DataFrame([[0] * (2 - holiday)] * 2000,
-                                         columns=['holiday_{}'.format(j) for j in range(holiday + 1,
-                                                                                        3)])
-            t4 = pd.concat([k1,
-                            t44,
-                            k2],
-                           axis=1)
-        else:
-            k=pd.DataFrame([[0] * (holiday)] * 2000,
-                                         columns=['holiday_{}'.format(j) for j in range(holiday)])
-            t4 = pd.concat([k,
-                            t44],
-                           axis=1)
-        del dataset['city_level'], dataset[
-            'weather'], dataset['weekday'], dataset['holiday']
-        dataset = pd.concat([dataset.ix[:, :], t1, t2, t3, t4], axis=1)
-        dataset.to_csv(
-            path_or_buf='predictset{}.csv'.format(
-                i, i), index=False)
+    for i in range(1, 8):
+        # 导入数据
+        os.chdir('./train/')
+        if line=='online':
+            os.chdir('./online/')
+        elif line=='offline':
+            os.chdir('./offline/')
+        t = pd.read_csv('dataset{}.csv'.format(i))
+        if model=='rf':
+            label = t.columns[2:-1]
+            x, y = t.ix[:, 2:-1].values, t.ix[:, -1].values
+            # 用模型训练
+            forest = RandomForestRegressor(
+                n_estimators=100,
+                random_state=0,
+                max_depth=10,
+                max_leaf_nodes=100,
+                max_features='auto',
+                n_jobs=-1,
+                oob_score=True)  # oob_score代替交叉验证
+            forest = forest.fit(x, y)
+            print forest.score(x, y)
 
-def offline_outcome():
+            # 查看特征重要性
+            print 'forest:', i
+            importances = forest.feature_importances_
+            indices = np.argsort(importances)[::-1]
+            for f in range(x.shape[1]):
+                print f,label[indices[f]], importances[indices[f]]
+
+            # 保存模型
+            os.chdir('../')
+            if line=='online':
+                os.chdir('../model/0216/online/')
+            else:
+                os.chdir('../model/0216/offline/')
+            joblib.dump(forest, 'rf_day{}.model'.format(i))
+            os.chdir('../../../')
+        elif model=='xgb':
+            data=t.ix[:, 2:-1].values
+            label=t.ix[:, -1].values
+            dtrain=xgb.DMatrix(data,label=label,feature_names=t.columns[2:-1])
+            params={'max_depth':max_depth,'silent':1,'eta':eta,'min_child_weight':min_child_weight,
+                    'gamma' : 0,'subsample' : 0.8,'colsample_bytree' : 0.8}
+            num_round = 10
+            bst = xgb.train(params, dtrain, num_round)
+            # 保存模型
+            os.chdir('../')
+            if line == 'online':
+                os.chdir('../model/0216/online/')
+            else:
+                os.chdir('../model/0216/offline/')
+            bst.save_model('xgb_day{}.model'.format(i))
+            #查看重要性
+            #xgb.plot_importance(bst)
+            os.chdir('../../../')
+    os.chdir('/home/fengyufei/PycharmProjects/competition/code')
+
+def outcome(predict_dataset_line=None,model_line=None,model=None):
+    #答案生成
     os.chdir('../dataset/model/0216/')
     res = []
     for i in range(1, 2001):
         res.append([i])
-    for i in range(1, 15):
-        forest=joblib.load('rf_day{}.model'.format(i))
-        os.chdir('./offline/')
-        t = pd.read_csv('predictset{}.csv'.format(i, i)).ix[:,2:].values
+    for i in range(1,8):
+        if model_line == 'online':
+            os.chdir('./online/')
+        else:
+            os.chdir('./offline/')
+        if model=='rf':
+            forest=joblib.load('rf_day{}.model'.format(i))
+        elif model=='xgb':
+            bst = xgb.Booster()
+            bst.load_model('xgb_day{}.model'.format(i))
         os.chdir('../')
-        tt = list(forest.predict(t))
+        if predict_dataset_line == 'online':
+            os.chdir('./online/')
+        else:
+            os.chdir('./offline/')
+        t = pd.read_csv('predictset{}.csv'.format(i)).ix[:, 2:].values
+        if model=='rf':
+            tt = list(forest.predict(t))
+        elif model=='xgb':
+            t=xgb.DMatrix(t)
+            tt = list(bst.predict(t))
         for i in range(2000):
             res[i].append(int(round(float(tt[i]))))
-    os.chdir('./offline/')
+        os.chdir('../')
+    '''
+    for i in range(8,15):#用前七天的模型#不行， 有负值。
+        if model_line == 'online':
+            os.chdir('./online/')
+        else:
+            os.chdir('./offline/')
+        if model=='rf':
+            forest=joblib.load('rf_day{}.model'.format(i-7))
+        elif model=='xgb':
+            bst = xgb.Booster()
+            bst.load_model('xgb_day{}.model'.format(i-7))
+        os.chdir('../')
+        #答案和预测集放在一起
+        if predict_dataset_line == 'online':
+            os.chdir('./online/')
+        else:
+            os.chdir('./offline/')
+        t = pd.read_csv('predictset{}.csv'.format(i)).ix[:, 2:].values
+        if model=='rf':
+            tt = list(forest.predict(t))
+        elif model=='xgb':
+            t=xgb.DMatrix(t)
+            tt = list(bst.predict(t))
+        for i in range(2000):
+            res[i].append(int(round(float(tt[i]))))
+        os.chdir('../')
+    '''
+    # 答案和预测集放在一起
+    if predict_dataset_line == 'online':
+        os.chdir('./online/')
+    else:
+        os.chdir('./offline/')
     with open('outcome.csv','w+') as f:
         writer = csv.writer(f)
         for i in range(2000):
-            writer.writerow(res[i] + res[i][1:])
+            writer.writerow(res[i]+res[i][1:8])
+    os.chdir('/home/fengyufei/PycharmProjects/competition/code')
+
 
 def offline_score():
     os.chdir('../dataset/')
     shop_day_pay=pd.read_csv('shop_day_pay.csv').set_index('shop_id')
     os.chdir('./model/0216/offline/')
-    outcome=pd.read_csv('outcome.csv',header=None)
+    outcome=pd.read_csv('outcome.csv',header=None).set_index(0)
     total=0.0
     date=datetime.date(2016,10,18)
     delta=datetime.timedelta(days=1)
     for i in range(1,2001):
         d=date
-        for j in range(14):
-            total+=abs(float((shop_day_pay.ix[i,date_to_string(d)]-outcome.ix[i-1,j+1])/float((shop_day_pay.ix[i,date_to_string(d)]+outcome.ix[i-1,j+1]))))
+        for j in range(1,15):
+            total+=abs(float((shop_day_pay.ix[i,date_to_string(d)]-outcome.ix[i,j])/float((shop_day_pay.ix[i,date_to_string(d)]+outcome.ix[i,j]))))
             d+=delta
     print float(total/28000)
+    os.chdir('/home/fengyufei/PycharmProjects/competition/code')
 
 if __name__ == '__main__':
-    offline_outcome()
-    offline_score()
+    print datetime.datetime.now()
+    #create_dataset(line='online')
+    #create_dataset(line='offline')
+    #create_predictset(line='online')
+    #create_predictset(line='offline')
+    train(line='online',model='xgb',max_depth=9,eta=0.3,min_child_weight=2)
+    #outcome(predict_dataset_line='offline', model_line='offline', model='xgb')
+    #train(line='offline',model='xgb',max_depth=i,eta=0.3,min_child_weight=j)
+    outcome(predict_dataset_line='online',model_line='online',model='xgb')
+    #print 'max_depth=',i,'min_child_weight=',j,offline_score()
+    print datetime.datetime.now()
 
