@@ -12,7 +12,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold, cross_val_score
 from sklearn.externals import joblib
-import xgboost as xgb
+#import xgboost as xgb
 import pandas as pd
 import numpy as np
 
@@ -426,6 +426,20 @@ def create_dataset(line=None):
                              'weather',
                              'weekday',
                              'holiday',
+                             'before_day_pay_28',
+                             'before_day_pay_27',
+                             'before_day_pay_26',
+                             'before_day_pay_25',
+                             'before_day_pay_24',
+                             'before_day_pay_23',
+                             'before_day_pay_22',
+                             'before_day_pay_21',
+                             'before_day_pay_20',
+                             'before_day_pay_19',
+                             'before_day_pay_18',
+                             'before_day_pay_17',
+                             'before_day_pay_16',
+                             'before_day_pay_15',
                              'before_day_pay_14',
                              'before_day_pay_13',
                              'before_day_pay_12',
@@ -440,9 +454,25 @@ def create_dataset(line=None):
                              'before_day_pay_3',
                              'before_day_pay_2',
                              'before_day_pay_1',
+                             'before_day_pay_28_average',
+                             'before_day_pay_21_average',
                              'before_day_pay_14_average',
                              'before_day_pay_7_average',
                              'before_day_pay_3_average',
+                             'before_day_view_28',
+                             'before_day_view_27',
+                             'before_day_view_26',
+                             'before_day_view_25',
+                             'before_day_view_24',
+                             'before_day_view_23',
+                             'before_day_view_22',
+                             'before_day_view_21',
+                             'before_day_view_20',
+                             'before_day_view_19',
+                             'before_day_view_18',
+                             'before_day_view_17',
+                             'before_day_view_16',
+                             'before_day_view_15',
                              'before_day_view_14',
                              'before_day_view_13',
                              'before_day_view_12',
@@ -457,9 +487,25 @@ def create_dataset(line=None):
                              'before_day_view_3',
                              'before_day_view_2',
                              'before_day_view_1',
+                             'before_day_view_28_average',
+                             'before_day_view_21_average',
                              'before_day_view_14_average',
                              'before_day_view_7_average',
                              'before_day_view_3_average',
+                             'before_divide_28',
+                             'before_divide_27',
+                             'before_divide_26',
+                             'before_divide_25',
+                             'before_divide_24',
+                             'before_divide_23',
+                             'before_divide_22',
+                             'before_divide_21',
+                             'before_divide_20',
+                             'before_divide_19',
+                             'before_divide_18',
+                             'before_divide_17',
+                             'before_divide_16',
+                             'before_divide_15',
                              'before_divide_14',
                              'before_divide_13',
                              'before_divide_12',
@@ -474,9 +520,25 @@ def create_dataset(line=None):
                              'before_divide_3',
                              'before_divide_2',
                              'before_divide_1',
+                             'before_28_average_divide',
+                             'before_21_average_divide',
                              'before_14_average_divide',
                              'before_7_average_divide',
                              'before_3_average_divide',
+                             'before_all_average_pay_28',
+                             'before_all_average_pay_27',
+                             'before_all_average_payy_26',
+                             'before_all_average_pay_25',
+                             'before_all_average_pay_24',
+                             'before_all_average_pay_23',
+                             'before_all_average_pay_22',
+                             'before_all_average_pay_21',
+                             'before_all_average_pay_20',
+                             'before_all_average_pay_19',
+                             'before_all_average_pay_18',
+                             'before_all_average_pay_17',
+                             'before_all_average_pay_16',
+                             'before_all_average_pay_15',
                              'before_all_average_pay_14',
                              'before_all_average_pay_13',
                              'before_all_average_pay_12',
@@ -491,9 +553,25 @@ def create_dataset(line=None):
                              'before_all_average_pay_3',
                              'before_all_average_pay_2',
                              'before_all_average_pay_1',
-                             'before_all_average_pay_average_14',
-                             'before_all_average_pay_average_7',
-                             'before_all_average_pay_average_3',
+                             'before_all_average_pay_28_average',
+                             'before_all_average_pay_21_average',
+                             'before_all_average_pay_14_average',
+                             'before_all_average_pay_7_average',
+                             'before_all_average_pay_3_average',
+                             'before_all_average_view_28',
+                             'before_all_average_view_27',
+                             'before_all_average_view_26',
+                             'before_all_average_view_25',
+                             'before_all_average_view_24',
+                             'before_all_average_view_23',
+                             'before_all_average_view_22',
+                             'before_all_average_view_21',
+                             'before_all_average_view_20',
+                             'before_all_average_view_19',
+                             'before_all_average_view_18',
+                             'before_all_average_view_17',
+                             'before_all_average_view_16',
+                             'before_all_average_view_15',
                              'before_all_average_view_14',
                              'before_all_average_view_13',
                              'before_all_average_view_12',
@@ -508,9 +586,25 @@ def create_dataset(line=None):
                              'before_all_average_view_3',
                              'before_all_average_view_2',
                              'before_all_average_view_1',
-                             'before_all_average_view_average_14',
-                             'before_all_average_view_average_7',
-                             'before_all_average_view_average_3',
+                             'before_all_average_view_28_average',
+                             'before_all_average_view_21_average',
+                             'before_all_average_view_14_average',
+                             'before_all_average_view_7_average',
+                             'before_all_average_view_3_average',
+                             'before_all_divide_28',
+                             'before_all_divide_27',
+                             'before_all_divide_26',
+                             'before_all_divide_25',
+                             'before_all_divide_24',
+                             'before_all_divide_23',
+                             'before_all_divide_22',
+                             'before_all_divide_21',
+                             'before_all_divide_20',
+                             'before_all_divide_19',
+                             'before_all_divide_18',
+                             'before_all_divide_17',
+                             'before_all_divide_16',
+                             'before_all_divide_15',
                              'before_all_divide_14',
                              'before_all_divide_13',
                              'before_all_divide_12',
@@ -525,6 +619,8 @@ def create_dataset(line=None):
                              'before_all_divide_3',
                              'before_all_divide_2',
                              'before_all_divide_1',
+                             'before_all_28_average_divide',
+                             'before_all_21_average_divide',
                              'before_all_14_average_divide',
                              'before_all_7_average_divide',
                              'before_all_3_average_divide',
@@ -545,14 +641,14 @@ def create_dataset(line=None):
                     begin_date=datetime.date(2016,2,1)
                 #不修改时间
                 if line == 'online':
-                    kkk = 19
-                    end_date = datetime.date(2016, 10, kkk - q)  # 改
-                else:
                     kkk = 5
-                    if kkk - q > 0:
+                    if kkk-q>0:
                         end_date = datetime.date(2016, 10, kkk - q)  # 改
                     else:
-                        end_date = datetime.date(2016, 9, 30 + kkk - q)  # 改
+                        end_date = datetime.date(2016,9,30+kkk-q)
+                else:
+                    kkk=21
+                    end_date = datetime.date(2016, 9, kkk - q)  # 改
                 '''
                 #强制从2016-07-01开始，减小数据量并且认为前面的数据不重要
                 if line=='online':
@@ -577,7 +673,7 @@ def create_dataset(line=None):
                 gap = (end_date - begin_date).days
                 for j in range(gap):
                     res = copy.deepcopy(basic)
-                    d = begin_date + (13 + q) * delta  # 改
+                    d = begin_date + (27 + q) * delta  # 改
                     str_d = date_to_string(d)
                     res.append(shop_day_upt.ix[i, str_d])
                     res.append(shop_day_lowt.ix[i, str_d])
@@ -585,35 +681,47 @@ def create_dataset(line=None):
                     res.append(shop_day_weather.ix[i, str_d])
                     res.append(shop_day_weekday.ix[0, str_d])
                     res.append(shop_day_holiday.ix[0, str_d])
-                    # 插入此商家前14天的信息
+                    # 插入此商家前28天的信息
                     l1 = []
                     l2 = []
                     d = begin_date
-                    for m in range(14):
+                    for m in range(28):
                         res.append(shop_day_pay.ix[i, date_to_string(d)])
                         l1.append(shop_day_pay.ix[i, date_to_string(d)])
                         d += delta
-                    tmp = sum(res[-14:]) / 14.0
+                    tmp = sum(res[-28:]) / 28.0
                     res.append(tmp)
                     l1.append(tmp)
-                    tmp = sum(res[-8:-1]) / 7.0
+                    tmp = sum(res[-22:-1]) / 21.0
                     res.append(tmp)
                     l1.append(tmp)
-                    tmp = sum(res[-5:-2]) / 3.0
+                    tmp = sum(res[-16:-2]) / 14.0
+                    res.append(tmp)
+                    l1.append(tmp)
+                    tmp = sum(res[-10:-3]) / 7.0
+                    res.append(tmp)
+                    l1.append(tmp)
+                    tmp = sum(res[-7:-4]) / 3.0
                     res.append(tmp)
                     l1.append(tmp)
                     d = begin_date
-                    for m in range(14):
+                    for m in range(28):
                         res.append(shop_day_view.ix[i, date_to_string(d)])
                         l2.append(shop_day_view.ix[i, date_to_string(d)])
                         d += delta
-                    tmp = sum(res[-14:]) / 14.0
+                    tmp = sum(res[-28:]) / 28.0
                     res.append(tmp)
                     l2.append(tmp)
-                    tmp = sum(res[-8:-1]) / 7.0
+                    tmp = sum(res[-22:-1]) / 21.0
                     res.append(tmp)
                     l2.append(tmp)
-                    tmp = sum(res[-5:-2]) / 3.0
+                    tmp = sum(res[-16:-2]) / 14.0
+                    res.append(tmp)
+                    l2.append(tmp)
+                    tmp = sum(res[-10:-3]) / 7.0
+                    res.append(tmp)
+                    l2.append(tmp)
+                    tmp = sum(res[-7:-4]) / 3.0
                     res.append(tmp)
                     l2.append(tmp)
                     for m, n in enumerate(l1):
@@ -625,7 +733,7 @@ def create_dataset(line=None):
                     l1 = []
                     l2 = []
                     d = begin_date
-                    for m in range(14):
+                    for m in range(28):
                         res.append(
                             all_shop_day_average_pay.ix[
                                 0, date_to_string(d)])
@@ -633,17 +741,23 @@ def create_dataset(line=None):
                             all_shop_day_average_pay.ix[
                                 0, date_to_string(d)])
                         d += delta
-                    tmp = sum(res[-14:]) / 14.0
+                    tmp = sum(res[-28:]) / 28.0
                     res.append(tmp)
                     l1.append(tmp)
-                    tmp = sum(res[-8:-1]) / 7.0
+                    tmp = sum(res[-22:-1]) / 21.0
                     res.append(tmp)
                     l1.append(tmp)
-                    tmp = sum(res[-5:-2]) / 3.0
+                    tmp = sum(res[-16:-2]) / 14.0
+                    res.append(tmp)
+                    l1.append(tmp)
+                    tmp = sum(res[-10:-3]) / 7.0
+                    res.append(tmp)
+                    l1.append(tmp)
+                    tmp = sum(res[-7:-4]) / 3.0
                     res.append(tmp)
                     l1.append(tmp)
                     d = begin_date
-                    for m in range(14):
+                    for m in range(28):
                         res.append(
                             all_shop_day_average_view.ix[
                                 0, date_to_string(d)])
@@ -651,13 +765,19 @@ def create_dataset(line=None):
                             all_shop_day_average_view.ix[
                                 0, date_to_string(d)])
                         d += delta
-                    tmp = sum(res[-14:]) / 14.0
+                    tmp = sum(res[-28:]) / 28.0
                     res.append(tmp)
                     l2.append(tmp)
-                    tmp = sum(res[-8:-1]) / 7.0
+                    tmp = sum(res[-22:-1]) / 21.0
                     res.append(tmp)
                     l2.append(tmp)
-                    tmp = sum(res[-5:-2]) / 3.0
+                    tmp = sum(res[-16:-2]) / 14.0
+                    res.append(tmp)
+                    l2.append(tmp)
+                    tmp = sum(res[-10:-3]) / 7.0
+                    res.append(tmp)
+                    l2.append(tmp)
+                    tmp = sum(res[-7:-4]) / 3.0
                     res.append(tmp)
                     l2.append(tmp)
                     for m, n in enumerate(l1):
@@ -685,7 +805,7 @@ def create_dataset(line=None):
         dataset = pd.concat([dataset.ix[:, :-1], t1, t2,
                              t3, t4, dataset.ix[:, -1]], axis=1)
         dataset.to_csv(path_or_buf='dataset{}.csv'.format( i), index=False)
-    os.chdir('/home/fengyufei/PycharmProjects/competition/code')
+    #os.chdir('/home/fengyufei/PycharmProjects/competition/code')
 
 def create_predictset(line=None):
     '''
@@ -746,6 +866,20 @@ def create_predictset(line=None):
                              'weather',
                              'weekday',
                              'holiday',
+                             'before_day_pay_28',
+                             'before_day_pay_27',
+                             'before_day_pay_26',
+                             'before_day_pay_25',
+                             'before_day_pay_24',
+                             'before_day_pay_23',
+                             'before_day_pay_22',
+                             'before_day_pay_21',
+                             'before_day_pay_20',
+                             'before_day_pay_19',
+                             'before_day_pay_18',
+                             'before_day_pay_17',
+                             'before_day_pay_16',
+                             'before_day_pay_15',
                              'before_day_pay_14',
                              'before_day_pay_13',
                              'before_day_pay_12',
@@ -760,9 +894,25 @@ def create_predictset(line=None):
                              'before_day_pay_3',
                              'before_day_pay_2',
                              'before_day_pay_1',
+                             'before_day_pay_28_average',
+                             'before_day_pay_21_average',
                              'before_day_pay_14_average',
                              'before_day_pay_7_average',
                              'before_day_pay_3_average',
+                             'before_day_view_28',
+                             'before_day_view_27',
+                             'before_day_view_26',
+                             'before_day_view_25',
+                             'before_day_view_24',
+                             'before_day_view_23',
+                             'before_day_view_22',
+                             'before_day_view_21',
+                             'before_day_view_20',
+                             'before_day_view_19',
+                             'before_day_view_18',
+                             'before_day_view_17',
+                             'before_day_view_16',
+                             'before_day_view_15',
                              'before_day_view_14',
                              'before_day_view_13',
                              'before_day_view_12',
@@ -777,9 +927,25 @@ def create_predictset(line=None):
                              'before_day_view_3',
                              'before_day_view_2',
                              'before_day_view_1',
+                             'before_day_view_28_average',
+                             'before_day_view_21_average',
                              'before_day_view_14_average',
                              'before_day_view_7_average',
                              'before_day_view_3_average',
+                             'before_divide_28',
+                             'before_divide_27',
+                             'before_divide_26',
+                             'before_divide_25',
+                             'before_divide_24',
+                             'before_divide_23',
+                             'before_divide_22',
+                             'before_divide_21',
+                             'before_divide_20',
+                             'before_divide_19',
+                             'before_divide_18',
+                             'before_divide_17',
+                             'before_divide_16',
+                             'before_divide_15',
                              'before_divide_14',
                              'before_divide_13',
                              'before_divide_12',
@@ -794,9 +960,25 @@ def create_predictset(line=None):
                              'before_divide_3',
                              'before_divide_2',
                              'before_divide_1',
+                             'before_28_average_divide',
+                             'before_21_average_divide',
                              'before_14_average_divide',
                              'before_7_average_divide',
                              'before_3_average_divide',
+                             'before_all_average_pay_28',
+                             'before_all_average_pay_27',
+                             'before_all_average_payy_26',
+                             'before_all_average_pay_25',
+                             'before_all_average_pay_24',
+                             'before_all_average_pay_23',
+                             'before_all_average_pay_22',
+                             'before_all_average_pay_21',
+                             'before_all_average_pay_20',
+                             'before_all_average_pay_19',
+                             'before_all_average_pay_18',
+                             'before_all_average_pay_17',
+                             'before_all_average_pay_16',
+                             'before_all_average_pay_15',
                              'before_all_average_pay_14',
                              'before_all_average_pay_13',
                              'before_all_average_pay_12',
@@ -811,9 +993,25 @@ def create_predictset(line=None):
                              'before_all_average_pay_3',
                              'before_all_average_pay_2',
                              'before_all_average_pay_1',
-                             'before_all_average_pay_average_14',
-                             'before_all_average_pay_average_7',
-                             'before_all_average_pay_average_3',
+                             'before_all_average_pay_28_average',
+                             'before_all_average_pay_21_average',
+                             'before_all_average_pay_14_average',
+                             'before_all_average_pay_7_average',
+                             'before_all_average_pay_3_average',
+                             'before_all_average_view_28',
+                             'before_all_average_view_27',
+                             'before_all_average_view_26',
+                             'before_all_average_view_25',
+                             'before_all_average_view_24',
+                             'before_all_average_view_23',
+                             'before_all_average_view_22',
+                             'before_all_average_view_21',
+                             'before_all_average_view_20',
+                             'before_all_average_view_19',
+                             'before_all_average_view_18',
+                             'before_all_average_view_17',
+                             'before_all_average_view_16',
+                             'before_all_average_view_15',
                              'before_all_average_view_14',
                              'before_all_average_view_13',
                              'before_all_average_view_12',
@@ -828,9 +1026,25 @@ def create_predictset(line=None):
                              'before_all_average_view_3',
                              'before_all_average_view_2',
                              'before_all_average_view_1',
-                             'before_all_average_view_average_14',
-                             'before_all_average_view_average_7',
-                             'before_all_average_view_average_3',
+                             'before_all_average_view_28_average',
+                             'before_all_average_view_21_average',
+                             'before_all_average_view_14_average',
+                             'before_all_average_view_7_average',
+                             'before_all_average_view_3_average',
+                             'before_all_divide_28',
+                             'before_all_divide_27',
+                             'before_all_divide_26',
+                             'before_all_divide_25',
+                             'before_all_divide_24',
+                             'before_all_divide_23',
+                             'before_all_divide_22',
+                             'before_all_divide_21',
+                             'before_all_divide_20',
+                             'before_all_divide_19',
+                             'before_all_divide_18',
+                             'before_all_divide_17',
+                             'before_all_divide_16',
+                             'before_all_divide_15',
                              'before_all_divide_14',
                              'before_all_divide_13',
                              'before_all_divide_12',
@@ -845,9 +1059,11 @@ def create_predictset(line=None):
                              'before_all_divide_3',
                              'before_all_divide_2',
                              'before_all_divide_1',
+                             'before_all_28_average_divide',
+                             'before_all_21_average_divide',
                              'before_all_14_average_divide',
                              'before_all_7_average_divide',
-                             'before_all_3_average_divide'])
+                             'before_all_3_average_divide',])
             for i in range(1, 2001):
                 z = float(shop_average.ix[i, 'average_view'])
                 zz = float(shop_average.ix[i, 'average_pay'])
@@ -1166,14 +1382,14 @@ def offline_score():
 
 if __name__ == '__main__':
     print datetime.datetime.now()
-    #create_dataset(line='online')
+    create_dataset(line='online')
     #create_dataset(line='offline')
     #create_predictset(line='online')
     #create_predictset(line='offline')
-    train(line='online',model='xgb',max_depth=9,eta=0.3,min_child_weight=2)
+    #train(line='online',model='xgb',max_depth=9,eta=0.3,min_child_weight=2)
     #outcome(predict_dataset_line='offline', model_line='offline', model='xgb')
     #train(line='offline',model='xgb',max_depth=i,eta=0.3,min_child_weight=j)
-    outcome(predict_dataset_line='online',model_line='online',model='xgb')
+    #outcome(predict_dataset_line='online',model_line='online',model='xgb')
     #print 'max_depth=',i,'min_child_weight=',j,offline_score()
     print datetime.datetime.now()
 
