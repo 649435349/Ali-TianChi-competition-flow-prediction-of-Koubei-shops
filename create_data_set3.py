@@ -1443,16 +1443,17 @@ if __name__ == '__main__':
     #outcome(predict_dataset_line='online', model_line='online', model='rf')
     for n_estimators in range(100,600,100):
         for max_depth in range(5,20):
-            for max_features in range(0.1,1,0.1):
-                for min_samples_split in range(1,20,2):
+            for max_features in range(1,11):
+                for min_samples_split in range(2,22,2):
                     for min_samples_leaf in range(1,30,3):
                         for max_leaf_nodes in range(51,501,50)+['None']:
                             try:
-                                train(line='offline',model='rf',n_estimators=n_estimators,max_depth=max_depth,max_features=max_features,min_samples_split=min_samples_split,min_samples_leaf=min_samples_leaf,max_leaf_nodes=max_leaf_nodes,
+                                train(line='offline',model='rf',n_estimators=n_estimators,max_depth=max_depth,max_features=max_features/10.0,min_samples_split=min_samples_split,min_samples_leaf=min_samples_leaf,max_leaf_nodes=max_leaf_nodes,
                                       min_child_weight=1,eta=0.3)
                                 outcome(predict_dataset_line='offline',model_line='offline',model='rf')
+                                print n_estimators,max_depth,max_features/10.0,min_samples_split,min_samples_leaf,min_samples_leaf,max_leaf_nodes
                                 offline_score()
                             except:
-                                pass
+                                continue
     print datetime.datetime.now()
 
