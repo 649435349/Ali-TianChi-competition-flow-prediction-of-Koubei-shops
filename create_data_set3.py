@@ -12,7 +12,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold, cross_val_score
 from sklearn.externals import joblib
-#import xgboost as xgb
+import xgboost as xgb
 import pandas as pd
 import numpy as np
 
@@ -805,7 +805,7 @@ def create_dataset(line=None):
         dataset = pd.concat([dataset.ix[:, :-1], t1, t2,
                              t3, t4, dataset.ix[:, -1]], axis=1)
         dataset.to_csv(path_or_buf='dataset{}.csv'.format( i), index=False)
-    #os.chdir('/home/fengyufei/PycharmProjects/competition/code')
+    os.chdir('/home/fengyufei/PycharmProjects/competition/code')
 
 def create_predictset(line=None):
     '''
@@ -1073,13 +1073,12 @@ def create_predictset(line=None):
                 basic = [i] + list(shop_info_modified.ix[i, :]) + \
                     list(shop_average.ix[i, :]) + [zz / z]
                 if line=='online':
-                    kkk=18
+                    begin_date = datetime.date(2016, 10, 4)
                 elif line=='offline':
-                    kkk=4
-                begin_date = datetime.date(2016, 10, kkk)
+                    begin_date = datetime.date(2016, 9,20)
                 delta = datetime.timedelta(days=1)
                 res = copy.deepcopy(basic)
-                d = begin_date + (13 + q) * delta  # 改
+                d = begin_date + (27 + q) * delta  # 改
                 str_d = date_to_string(d)
                 res.append(shop_day_upt.ix[i, str_d])
                 res.append(shop_day_lowt.ix[i, str_d])
@@ -1087,35 +1086,47 @@ def create_predictset(line=None):
                 res.append(shop_day_weather.ix[i, str_d])
                 res.append(shop_day_weekday.ix[0, str_d])
                 res.append(shop_day_holiday.ix[0, str_d])
-                # 插入此商家前14天的信息
+                # 插入此商家前28天的信息
                 l1 = []
                 l2 = []
                 d = begin_date
-                for m in range(14):
+                for m in range(28):
                     res.append(shop_day_pay.ix[i, date_to_string(d)])
                     l1.append(shop_day_pay.ix[i, date_to_string(d)])
                     d += delta
-                tmp = sum(res[-14:]) / 14.0
+                tmp = sum(res[-28:]) / 28.0
                 res.append(tmp)
                 l1.append(tmp)
-                tmp = sum(res[-8:-1]) / 7.0
+                tmp = sum(res[-22:-1]) / 21.0
                 res.append(tmp)
                 l1.append(tmp)
-                tmp = sum(res[-5:-2]) / 3.0
+                tmp = sum(res[-16:-2]) / 14.0
+                res.append(tmp)
+                l1.append(tmp)
+                tmp = sum(res[-10:-3]) / 7.0
+                res.append(tmp)
+                l1.append(tmp)
+                tmp = sum(res[-7:-4]) / 3.0
                 res.append(tmp)
                 l1.append(tmp)
                 d = begin_date
-                for m in range(14):
+                for m in range(28):
                     res.append(shop_day_view.ix[i, date_to_string(d)])
                     l2.append(shop_day_view.ix[i, date_to_string(d)])
                     d += delta
-                tmp = sum(res[-14:]) / 14.0
+                tmp = sum(res[-28:]) / 28.0
                 res.append(tmp)
                 l2.append(tmp)
-                tmp = sum(res[-8:-1]) / 7.0
+                tmp = sum(res[-22:-1]) / 21.0
                 res.append(tmp)
                 l2.append(tmp)
-                tmp = sum(res[-5:-2]) / 3.0
+                tmp = sum(res[-16:-2]) / 14.0
+                res.append(tmp)
+                l2.append(tmp)
+                tmp = sum(res[-10:-3]) / 7.0
+                res.append(tmp)
+                l2.append(tmp)
+                tmp = sum(res[-7:-4]) / 3.0
                 res.append(tmp)
                 l2.append(tmp)
                 for m, n in enumerate(l1):
@@ -1127,7 +1138,7 @@ def create_predictset(line=None):
                 l1 = []
                 l2 = []
                 d = begin_date
-                for m in range(14):
+                for m in range(28):
                     res.append(
                         all_shop_day_average_pay.ix[
                             0, date_to_string(d)])
@@ -1135,17 +1146,23 @@ def create_predictset(line=None):
                         all_shop_day_average_pay.ix[
                             0, date_to_string(d)])
                     d += delta
-                tmp = sum(res[-14:]) / 14.0
+                tmp = sum(res[-28:]) / 28.0
                 res.append(tmp)
                 l1.append(tmp)
-                tmp = sum(res[-8:-1]) / 7.0
+                tmp = sum(res[-22:-1]) / 21.0
                 res.append(tmp)
                 l1.append(tmp)
-                tmp = sum(res[-5:-2]) / 3.0
+                tmp = sum(res[-16:-2]) / 14.0
+                res.append(tmp)
+                l1.append(tmp)
+                tmp = sum(res[-10:-3]) / 7.0
+                res.append(tmp)
+                l1.append(tmp)
+                tmp = sum(res[-7:-4]) / 3.0
                 res.append(tmp)
                 l1.append(tmp)
                 d = begin_date
-                for m in range(14):
+                for m in range(28):
                     res.append(
                         all_shop_day_average_view.ix[
                             0, date_to_string(d)])
@@ -1153,13 +1170,19 @@ def create_predictset(line=None):
                         all_shop_day_average_view.ix[
                             0, date_to_string(d)])
                     d += delta
-                tmp = sum(res[-14:]) / 14.0
+                tmp = sum(res[-28:]) / 28.0
                 res.append(tmp)
                 l2.append(tmp)
-                tmp = sum(res[-8:-1]) / 7.0
+                tmp = sum(res[-22:-1]) / 21.0
                 res.append(tmp)
                 l2.append(tmp)
-                tmp = sum(res[-5:-2]) / 3.0
+                tmp = sum(res[-16:-2]) / 14.0
+                res.append(tmp)
+                l2.append(tmp)
+                tmp = sum(res[-10:-3]) / 7.0
+                res.append(tmp)
+                l2.append(tmp)
+                tmp = sum(res[-7:-4]) / 3.0
                 res.append(tmp)
                 l2.append(tmp)
                 for m, n in enumerate(l1):
@@ -1168,10 +1191,12 @@ def create_predictset(line=None):
                     else:
                         res.append(n + 1)
                 res.insert(1, date_to_string(d + (q - 1) * delta))  # 改
-                res.insert(2,((d + (q - 1) * delta)-string_to_date(shop_first_no0_date.ix[i,'first_no0_pay_date'])).days)
+                res.insert(2, (
+                (d + (q - 1) * delta) - string_to_date(shop_first_no0_date.ix[i, 'first_no0_pay_date'])).days)
+                begin_date += delta
                 writer.writerow(res)
     # one hot coding
-    for i in range(1, 14):
+    for i in range(1, 15):
         dataset = pd.read_csv('predictset{}.csv'.format(i))
         os.remove('predictset{}.csv'.format(i))
         t1 = pd.get_dummies(dataset['city_level'], prefix='city_level')
@@ -1280,7 +1305,7 @@ def train(line=None,model=None,max_depth=None,eta=0.3,min_child_weight=None):
             label=t.ix[:, -1].values
             dtrain=xgb.DMatrix(data,label=label,feature_names=t.columns[2:-1])
             params={'max_depth':max_depth,'silent':1,'eta':eta,'min_child_weight':min_child_weight,
-                    'gamma' : 0,'subsample' : 0.8,'colsample_bytree' : 0.8}
+                    'gamma' : 0,'subsample' : 1,'colsample_bytree' : 0.8}
             num_round = 10
             bst = xgb.train(params, dtrain, num_round)
             # 保存模型
@@ -1382,14 +1407,14 @@ def offline_score():
 
 if __name__ == '__main__':
     print datetime.datetime.now()
-    create_dataset(line='online')
+    #create_dataset(line='online')
     #create_dataset(line='offline')
     #create_predictset(line='online')
     #create_predictset(line='offline')
-    #train(line='online',model='xgb',max_depth=9,eta=0.3,min_child_weight=2)
-    #outcome(predict_dataset_line='offline', model_line='offline', model='xgb')
-    #train(line='offline',model='xgb',max_depth=i,eta=0.3,min_child_weight=j)
-    #outcome(predict_dataset_line='online',model_line='online',model='xgb')
-    #print 'max_depth=',i,'min_child_weight=',j,offline_score()
+    train(line='online',model='xgb',max_depth=9,eta=0.3,min_child_weight=1)
+    outcome(predict_dataset_line='online', model_line='online', model='xgb')
+    train(line='offline',model='xgb',max_depth=9,eta=0.3,min_child_weight=1)
+    outcome(predict_dataset_line='offline',model_line='offline',model='xgb')
+    offline_score()
     print datetime.datetime.now()
 
