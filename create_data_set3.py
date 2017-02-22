@@ -12,7 +12,9 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold, cross_val_score
 from sklearn.externals import joblib
-import xgboost as xgb
+import platform
+if 'ubuntu' in platform.platform():
+    import xgboost as xgb
 import pandas as pd
 import numpy as np
 
@@ -369,7 +371,7 @@ def one_hot_encoding():
                              t3, t4, dataset.ix[:, -1]], axis=1)
         dataset.to_csv(path_or_buf='dataset{}{}.csv'.format(i, i), index=False)
 
-def create_dataset(line=None):
+def create_dataset(line):
     os.chdir('../dataset/')
     all_shop_day_average_pay = pd.read_csv('all_shop_day_average_pay.csv')
     all_shop_day_average_view = pd.read_csv('all_shop_day_average_view.csv')
@@ -805,9 +807,12 @@ def create_dataset(line=None):
         dataset = pd.concat([dataset.ix[:, :-1], t1, t2,
                              t3, t4, dataset.ix[:, -1]], axis=1)
         dataset.to_csv(path_or_buf='dataset{}.csv'.format( i), index=False)
-    os.chdir('/home/fengyufei/PycharmProjects/competition/code')
+    if if_ubuntu():
+        os.chdir('/home/fengyufei/PycharmProjects/competition/code')
+    else:
+        os.chdir('E:\competition\code')
 
-def create_predictset(line=None):
+def create_predictset(line):
     '''
     # 用于获得预测的数据
     '''
@@ -1258,9 +1263,13 @@ def create_predictset(line=None):
             'weather'], dataset['weekday'], dataset['holiday']
         dataset = pd.concat([dataset.ix[:, :], t1, t2, t3, t4], axis=1)
         dataset.to_csv(path_or_buf='predictset{}.csv'.format(i), index=False)
-    os.chdir('/home/fengyufei/PycharmProjects/competition/code')
+    if if_ubuntu():
+        os.chdir('/home/fengyufei/PycharmProjects/competition/code')
+    else:
+        os.chdir('E:\competition\code')
 
-def train(line=None,model=None,max_depth=None,eta=0.3,min_child_weight=None):
+def train(line,model,n_estimators,max_depth,max_features,min_samples_split,min_samples_leaf,max_leaf_nodes,
+          min_child_weight,eta):
     os.chdir('../dataset/')
     for i in range(1, 8):
         # 导入数据
@@ -1275,14 +1284,16 @@ def train(line=None,model=None,max_depth=None,eta=0.3,min_child_weight=None):
             x, y = t.ix[:, 2:-1].values, t.ix[:, -1].values
             # 用模型训练
             forest = RandomForestRegressor(
-                n_estimators=100,
-                random_state=0,
-                max_depth=10,
-                max_leaf_nodes=100,
-                max_features='auto',
+                n_estimators=n_estimators,
+                max_depth=max_depth,
+                max_features=max_features,
+                min_samples_split=min_samples_split,
+                min_samples_leaf=min_samples_leaf,
+                max_leaf_nodes=max_leaf_nodes,
                 n_jobs=-1,
                 oob_score=True)  # oob_score代替交叉验证
             forest = forest.fit(x, y)
+            '''
             print forest.score(x, y)
 
             # 查看特征重要性
@@ -1290,7 +1301,8 @@ def train(line=None,model=None,max_depth=None,eta=0.3,min_child_weight=None):
             importances = forest.feature_importances_
             indices = np.argsort(importances)[::-1]
             for f in range(x.shape[1]):
-                print f,label[indices[f]], importances[indices[f]]
+                print f+1,label[indices[f]], importances[indices[f]]
+            '''
 
             # 保存模型
             os.chdir('../')
@@ -1318,9 +1330,12 @@ def train(line=None,model=None,max_depth=None,eta=0.3,min_child_weight=None):
             #查看重要性
             #xgb.plot_importance(bst)
             os.chdir('../../../')
-    os.chdir('/home/fengyufei/PycharmProjects/competition/code')
+    if if_ubuntu():
+        os.chdir('/home/fengyufei/PycharmProjects/competition/code')
+    else:
+        os.chdir('E:\competition\code')
 
-def outcome(predict_dataset_line=None,model_line=None,model=None):
+def outcome(predict_dataset_line,model_line,model):
     #答案生成
     os.chdir('../dataset/model/0216/')
     res = []
@@ -1386,7 +1401,10 @@ def outcome(predict_dataset_line=None,model_line=None,model=None):
         writer = csv.writer(f)
         for i in range(2000):
             writer.writerow(res[i]+res[i][1:8])
-    os.chdir('/home/fengyufei/PycharmProjects/competition/code')
+    if if_ubuntu():
+        os.chdir('/home/fengyufei/PycharmProjects/competition/code')
+    else:
+        os.chdir('E:\competition\code')
 
 
 def offline_score():
@@ -1403,7 +1421,17 @@ def offline_score():
             total+=abs(float((shop_day_pay.ix[i,date_to_string(d)]-outcome.ix[i,j])/float((shop_day_pay.ix[i,date_to_string(d)]+outcome.ix[i,j]))))
             d+=delta
     print float(total/28000)
-    os.chdir('/home/fengyufei/PycharmProjects/competition/code')
+    if if_ubuntu():
+        os.chdir('/home/fengyufei/PycharmProjects/competition/code')
+    else:
+        os.chdir('E:\competition\code')
+
+
+def if_ubuntu():
+    if 'ubuntu' in platform.platform():
+        return True
+    else:
+        return False
 
 if __name__ == '__main__':
     print datetime.datetime.now()
@@ -1411,11 +1439,21 @@ if __name__ == '__main__':
     #create_dataset(line='offline')
     #create_predictset(line='online')
     #create_predictset(line='offline')
-    pass
-    train(line='online',model='xgb',max_depth=9,eta=0.3,min_child_weight=1)
-    outcome(predict_dataset_line='online', model_line='online', model='xgb')
-    train(line='offline',model='xgb',max_depth=9,eta=0.3,min_child_weight=1)
-    outcome(predict_dataset_line='offline',model_line='offline',model='xgb')
-    offline_score()
+    #train(line='online',model='rf',max_depth=9,eta=0.3,min_child_weight=1)
+    #outcome(predict_dataset_line='online', model_line='online', model='rf')
+    for n_estimators in range(100,600,100):
+        for max_depth in range(5,20):
+            for max_features in range(1,11):
+                for min_samples_split in range(2,22,2):
+                    for min_samples_leaf in range(1,30,3):
+                        for max_leaf_nodes in range(51,501,50)+['None']:
+                            try:
+                                train(line='offline',model='rf',n_estimators=n_estimators,max_depth=max_depth,max_features=max_features/10.0,min_samples_split=min_samples_split,min_samples_leaf=min_samples_leaf,max_leaf_nodes=max_leaf_nodes,
+                                      min_child_weight=1,eta=0.3)
+                                outcome(predict_dataset_line='offline',model_line='offline',model='rf')
+                                print n_estimators,max_depth,max_features/10.0,min_samples_split,min_samples_leaf,min_samples_leaf,max_leaf_nodes
+                                offline_score()
+                            except:
+                                continue
     print datetime.datetime.now()
 
