@@ -309,6 +309,10 @@ def get_average_pay():
                 res.append(0)
             date += delta
         writer.writerow(res)
+    if if_Ubuntu():
+        os.chdir('/home/fengyufei/PycharmProjects/competition/code')
+    else:
+        os.chdir('E:\competition\code')
 
 def get_first_no0_date():
     # 得到每个商家不是0的第一天的日期，支付和浏览
@@ -368,13 +372,23 @@ def create_shop_average():
                 shop_first_no0_date.ix[
                     i, 'first_no0_pay_date'])
             days = (date_11_1 - date).days
-            res.append(np.mean(shop_day_pay.ix[i, (-days):][shop_day_pay.ix[i, (-days):]!=0]))
+            if not np.isnan(np.mean(shop_day_pay.ix[i, (-days):][shop_day_pay.ix[i, (-days):]!=0])):
+                res.append(int(round(float(np.mean(shop_day_pay.ix[i, (-days):][shop_day_pay.ix[i, (-days):]!=0])))))
+            else:
+                res.append(0)
             date = string_to_date(
                 shop_first_no0_date.ix[
                     i, 'first_no0_view_date'])
             days = (date_11_1 - date).days
-            res.append(np.mean(shop_day_view.ix[i, (-days):][shop_day_view.ix[i, (-days):]!=0]))
+            if not np.isnan(np.mean(shop_day_view.ix[i, (-days):][shop_day_view.ix[i, (-days):]!=0])):
+                res.append(int(round(float(np.mean(shop_day_view.ix[i, (-days):][shop_day_view.ix[i, (-days):]!=0])))))
+            else:
+                res.append(0)
             writer.writerow(res)
+    if if_Ubuntu():
+        os.chdir('/home/fengyufei/PycharmProjects/competition/code')
+    else:
+        os.chdir('E:\competition\code')
 
 def string_to_date(s):
     l = re.findall(r'\d+', s)
@@ -1147,7 +1161,7 @@ def train(line=None,model=None,n_estimators=None,max_depth=None,max_features=Non
             dtrain=xgb.DMatrix(data,label=label,feature_names=t.columns[2:-1])
             params={'max_depth':max_depth,'silent':1,'eta':0.1,'min_child_weight':min_child_weight,
                     'gamma' : 0,'subsample' : 1,'colsample_bytree' : 0.8}
-            num_round = 20
+            num_round = 10
             bst = xgb.train(params, dtrain, num_round)
             # 保存模型
             os.chdir('../')
@@ -1262,6 +1276,7 @@ def if_Ubuntu():
 
 if __name__ == '__main__':
     print datetime.datetime.now()
+    create_shop_average()
     #create_dataset(line='online')
     create_dataset(line='offline')
     #create_predictset(line='online')
