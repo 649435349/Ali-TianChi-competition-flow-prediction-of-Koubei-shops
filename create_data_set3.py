@@ -1254,10 +1254,9 @@ if __name__ == '__main__':
     #create_dataset(line='online')
     #create_dataset(line='offline')
     #create_predictset(line='online')
-    create_predictset(line='offline')
+    #create_predictset(line='offline')
     #train(line='online',model='rf',max_depth=9,eta=0.3,min_child_weight=1)
     #outcome(predict_dataset_line='online', model_line='online', model='rf')
-    '''
     for n_estimators in range(100,600,100):
         for max_depth in range(5,20):
             for max_features in range(1,11):
@@ -1276,6 +1275,5 @@ if __name__ == '__main__':
                                     os.chdir('/home/fengyufei/PycharmProjects/competition/code')
                                 else:
                                     os.chdir('E:\competition\code')
-    '''
     print datetime.datetime.now()
 
