@@ -284,8 +284,10 @@ def get_average_pay():
         date = datetime.datetime(2015, 7, 1)
         res = []
         while date.year != 2016 or date.month != 11 or date.day != 1:
-            res.append(
-                np.mean(t.ix[:, date_to_string(date)][t.ix[:, date_to_string(date)] != 0]))
+            if not np.isnan(np.mean(t.ix[:, date_to_string(date)][t.ix[:, date_to_string(date)] != 0])):
+                res.append(int(round(float(np.mean(t.ix[:, date_to_string(date)][t.ix[:,date_to_string(date)]!=0])))))
+            else:
+                res.append(0)
             date += delta
         writer.writerow(res)
     t = pd.read_csv('shop_day_view.csv').set_index('shop_id')
@@ -301,8 +303,10 @@ def get_average_pay():
         date = datetime.datetime(2016, 2, 1)
         res = []
         while date.year != 2016 or date.month != 11 or date.day != 1:
-            res.append(
-                np.mean(t.ix[:, date_to_string(date)][t.ix[:,date_to_string(date)]!=0]))
+            if not np.isnan(np.mean(t.ix[:, date_to_string(date)][t.ix[:, date_to_string(date)] != 0])):
+                res.append(int(round(float(np.mean(t.ix[:, date_to_string(date)][t.ix[:,date_to_string(date)]!=0])))))
+            else:
+                res.append(0)
             date += delta
         writer.writerow(res)
 
@@ -578,7 +582,7 @@ def create_dataset(line):
                     z = 1
                     zz += 1
                 basic = [i] + list(shop_info_modified.ix[i, :'shop_level']) + \
-                    list(shop_average.ix[i, :]) + [zz / z]
+                    list(shop_average.ix[i, :].astype('int')) + [zz / z]
                 begin_date = string_to_date(
                     shop_first_no0_date.ix[
                         i, 'first_no0_pay_date'])
@@ -643,14 +647,15 @@ def create_dataset(line):
                     if boolen:
                         l1=copy.deepcopy(judgel)
                     else:
+                        begin_date += delta
                         continue
-                    tmp = sum(res[-14:]) / 14.0
+                    tmp = int(round(float(sum(res[-14:]) / 14.0)))
                     res.append(tmp)
                     l1.append(tmp)
-                    tmp = sum(res[-8:-1]) / 7.0
+                    tmp = int(round(float(sum(res[-8:-1]) / 7.0)))
                     res.append(tmp)
                     l1.append(tmp)
-                    tmp = sum(res[-5:-2]) / 3.0
+                    tmp = int(round(float(sum(res[-5:-2]) / 3.0)))
                     res.append(tmp)
                     l1.append(tmp)
                     d = begin_date
@@ -658,13 +663,13 @@ def create_dataset(line):
                         res.append(shop_day_view.ix[i, date_to_string(d)])
                         l2.append(shop_day_view.ix[i, date_to_string(d)])
                         d += delta
-                    tmp = sum(res[-14:]) / 14.0
+                    tmp = int(round(float(sum(res[-14:]) / 14.0)))
                     res.append(tmp)
                     l2.append(tmp)
-                    tmp = sum(res[-8:-1]) / 7.0
+                    tmp = int(round(float(sum(res[-8:-1]) / 7.0)))
                     res.append(tmp)
                     l2.append(tmp)
-                    tmp = sum(res[-5:-2]) / 3.0
+                    tmp = int(round(float(sum(res[-5:-2]) / 3.0)))
                     res.append(tmp)
                     l2.append(tmp)
                     for m, n in enumerate(l1):
@@ -678,37 +683,40 @@ def create_dataset(line):
                     d = begin_date
                     for m in range(14):
                         res.append(
-                            all_shop_day_average_pay.ix[
-                                0, date_to_string(d)])
+                            int(round(float(all_shop_day_average_pay.ix[
+                                0, date_to_string(d)]))))
                         l1.append(
-                            all_shop_day_average_pay.ix[
-                                0, date_to_string(d)])
+                            int(round(float(all_shop_day_average_pay.ix[
+                                0, date_to_string(d)]))))
                         d += delta
-                    tmp = sum(res[-14:]) / 14.0
+                    tmp = int(round(float(sum(res[-14:]) / 14.0)))
                     res.append(tmp)
                     l1.append(tmp)
-                    tmp = sum(res[-8:-1]) / 7.0
+                    tmp = int(round(float(sum(res[-8:-1]) / 7.0)))
                     res.append(tmp)
                     l1.append(tmp)
-                    tmp = sum(res[-5:-2]) / 3.0
+                    tmp = int(round(float(sum(res[-5:-2]) / 3.0)))
                     res.append(tmp)
                     l1.append(tmp)
                     d = begin_date
                     for m in range(14):
-                        res.append(
-                            all_shop_day_average_view.ix[
-                                0, date_to_string(d)])
-                        l2.append(
-                            all_shop_day_average_view.ix[
-                                0, date_to_string(d)])
+                        try:
+                            res.append(
+                                int(round(float(all_shop_day_average_view.ix[
+                                    0, date_to_string(d)]))))
+                            l2.append(
+                                int(round(float(all_shop_day_average_view.ix[
+                                    0, date_to_string(d)]))))
+                        except:
+                            print d
                         d += delta
-                    tmp = sum(res[-14:]) / 14.0
+                    tmp = int(round(float(sum(res[-14:]) / 14.0)))
                     res.append(tmp)
                     l2.append(tmp)
-                    tmp = sum(res[-8:-1]) / 7.0
+                    tmp = int(round(float(sum(res[-8:-1]) / 7.0)))
                     res.append(tmp)
                     l2.append(tmp)
-                    tmp = sum(res[-4:-2]) / 3.0
+                    tmp = int(round(float(sum(res[-4:-2]) / 3.0)))
                     res.append(tmp)
                     l2.append(tmp)
                     for m, n in enumerate(l1):
@@ -942,13 +950,13 @@ def create_predictset(line):
                     res.append(t)
                     l1.append(t)
                     d += delta
-                tmp = sum(res[-14:]) / 14.0
+                tmp = int(sum(res[-14:]) / 14.0)
                 res.append(tmp)
                 l1.append(tmp)
-                tmp = sum(res[-8:-1]) / 7.0
+                tmp = int(sum(res[-8:-1]) / 7.0)
                 res.append(tmp)
                 l1.append(tmp)
-                tmp = sum(res[-5:-2]) / 3.0
+                tmp = int(sum(res[-5:-2]) / 3.0)
                 res.append(tmp)
                 l1.append(tmp)
                 d = begin_date
@@ -956,13 +964,13 @@ def create_predictset(line):
                     res.append(shop_day_view.ix[i, date_to_string(d)])
                     l2.append(shop_day_view.ix[i, date_to_string(d)])
                     d += delta
-                tmp = sum(res[-14:]) / 14.0
+                tmp = int(sum(res[-14:]) / 14.0)
                 res.append(tmp)
                 l2.append(tmp)
-                tmp = sum(res[-8:-1]) / 7.0
+                tmp = int(sum(res[-8:-1]) / 7.0)
                 res.append(tmp)
                 l2.append(tmp)
-                tmp = sum(res[-5:-2]) / 3.0
+                tmp = int(sum(res[-5:-2]) / 3.0)
                 res.append(tmp)
                 l2.append(tmp)
                 for m, n in enumerate(l1):
@@ -976,37 +984,37 @@ def create_predictset(line):
                 d = begin_date
                 for m in range(14):
                     res.append(
-                        all_shop_day_average_pay.ix[
-                            0, date_to_string(d)])
+                        int(all_shop_day_average_pay.ix[
+                            0, date_to_string(d)]))
                     l1.append(
-                        all_shop_day_average_pay.ix[
-                            0, date_to_string(d)])
+                        int(all_shop_day_average_pay.ix[
+                            0, date_to_string(d)]))
                     d += delta
-                tmp = sum(res[-14:]) / 14.0
+                tmp = int(sum(res[-14:]) / 14.0)
                 res.append(tmp)
                 l1.append(tmp)
-                tmp = sum(res[-8:-1]) / 7.0
+                tmp = int(sum(res[-8:-1]) / 7.0)
                 res.append(tmp)
                 l1.append(tmp)
-                tmp = sum(res[-5:-2]) / 3.0
+                tmp = int(sum(res[-5:-2]) / 3.0)
                 res.append(tmp)
                 l1.append(tmp)
                 d = begin_date
                 for m in range(14):
                     res.append(
-                        all_shop_day_average_view.ix[
-                            0, date_to_string(d)])
+                        int(all_shop_day_average_view.ix[
+                            0, date_to_string(d)]))
                     l2.append(
-                        all_shop_day_average_view.ix[
-                            0, date_to_string(d)])
+                        int(all_shop_day_average_view.ix[
+                            0, date_to_string(d)]))
                     d += delta
-                tmp = sum(res[-14:]) / 14.0
+                tmp = int(sum(res[-14:]) / 14.0)
                 res.append(tmp)
                 l2.append(tmp)
-                tmp = sum(res[-8:-1]) / 7.0
+                tmp = int(sum(res[-8:-1]) / 7.0)
                 res.append(tmp)
                 l2.append(tmp)
-                tmp = sum(res[-5:-2]) / 3.0
+                tmp = int(sum(res[-5:-2]) / 3.0)
                 res.append(tmp)
                 l2.append(tmp)
                 for m, n in enumerate(l1):
@@ -1137,9 +1145,9 @@ def train(line=None,model=None,n_estimators=None,max_depth=None,max_features=Non
             data=t.ix[:, 2:-1].values
             label=t.ix[:, -1].values
             dtrain=xgb.DMatrix(data,label=label,feature_names=t.columns[2:-1])
-            params={'max_depth':max_depth,'silent':1,'eta':eta,'min_child_weight':min_child_weight,
+            params={'max_depth':max_depth,'silent':1,'eta':0.1,'min_child_weight':min_child_weight,
                     'gamma' : 0,'subsample' : 1,'colsample_bytree' : 0.8}
-            num_round = 10
+            num_round = 20
             bst = xgb.train(params, dtrain, num_round)
             # 保存模型
             os.chdir('../')
@@ -1255,9 +1263,9 @@ def if_Ubuntu():
 if __name__ == '__main__':
     print datetime.datetime.now()
     #create_dataset(line='online')
-    #create_dataset(line='offline')
-    create_predictset(line='online')
-    create_predictset(line='offline')
+    create_dataset(line='offline')
+    #create_predictset(line='online')
+    #create_predictset(line='offline')
     #train(line='online',model='rf',max_depth=9,eta=0.3,min_child_weight=1)
     #outcome(predict_dataset_line='online', model_line='online', model='rf')
     train(line='offline',model='xgb',max_depth=9,eta=0.3,min_child_weight=1)
