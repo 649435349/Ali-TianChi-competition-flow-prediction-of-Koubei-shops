@@ -915,8 +915,8 @@ def create_predictset(line):
                 if z == 0:
                     z = 1
                     zz += 1
-                basic = [i] + list(shop_info_modified.ix[i, :'shop_level']) + \
-                        list(shop_average.ix[i, :]) + [zz / z]
+                basic = [i] + list(shop_info_modified.ix[i, :]) + \
+                    list(shop_average.ix[i, :]) + [zz / z]
                 if line=='online':
                     begin_date = datetime.date(2016, 10, 18)
                 elif line=='offline':
@@ -1252,9 +1252,9 @@ def if_Ubuntu():
 if __name__ == '__main__':
     print datetime.datetime.now()
     #create_dataset(line='online')
-    #create_dataset(line='offline')
+    create_dataset(line='offline')
     #create_predictset(line='online')
-    create_predictset(line='offline')
+    #create_predictset(line='offline')
     #train(line='online',model='rf',max_depth=9,eta=0.3,min_child_weight=1)
     #outcome(predict_dataset_line='online', model_line='online', model='rf')
     '''
