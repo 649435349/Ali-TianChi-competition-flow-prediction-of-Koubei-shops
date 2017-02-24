@@ -931,13 +931,16 @@ def create_predictset(line):
                 res.append(shop_day_weather.ix[i, str_d])
                 res.append(shop_day_weekday.ix[0, str_d])
                 res.append(shop_day_holiday.ix[0, str_d])
-                # 插入此商家前28天的信息
+                # 插入此商家前14天的信息
                 l1 = []
                 l2 = []
                 d = begin_date
                 for m in range(14):
-                    res.append(shop_day_pay.ix[i, date_to_string(d)])
-                    l1.append(shop_day_pay.ix[i, date_to_string(d)])
+                    t=shop_day_pay.ix[i, date_to_string(d)]
+                    if t==0:
+                        t=shop_average.ix[i,'average_pay']
+                    res.append(t)
+                    l1.append(t)
                     d += delta
                 tmp = sum(res[-14:]) / 14.0
                 res.append(tmp)
@@ -1086,8 +1089,8 @@ def create_predictset(line):
     else:
         os.chdir('E:\competition\code')
 
-def train(line,model,n_estimators,max_depth,max_features,min_samples_split,min_samples_leaf,max_leaf_nodes,
-          min_child_weight,eta):
+def train(line=None,model=None,n_estimators=None,max_depth=None,max_features=None,min_samples_split=None,min_samples_leaf=None,max_leaf_nodes=None,
+          min_child_weight=None,eta=None):
     os.chdir('../dataset/')
     for i in range(1, 8):
         # 导入数据
@@ -1153,7 +1156,7 @@ def train(line,model,n_estimators,max_depth,max_features,min_samples_split,min_s
     else:
         os.chdir('E:\competition\code')
 
-def outcome(predict_dataset_line,model_line,model):
+def outcome(predict_dataset_line=None,model_line=None,model=None):
     #答案生成
     os.chdir('../dataset/model/0216/')
     res = []
@@ -1253,10 +1256,14 @@ if __name__ == '__main__':
     print datetime.datetime.now()
     #create_dataset(line='online')
     #create_dataset(line='offline')
-    #create_predictset(line='online')
-    #create_predictset(line='offline')
+    create_predictset(line='online')
+    create_predictset(line='offline')
     #train(line='online',model='rf',max_depth=9,eta=0.3,min_child_weight=1)
     #outcome(predict_dataset_line='online', model_line='online', model='rf')
+    train(line='offline',model='xgb',max_depth=9,eta=0.3,min_child_weight=1)
+    outcome(predict_dataset_line='offline', model_line='offline', model='xgb')
+    offline_score()
+    '''
     for n_estimators in range(100,600,100):
         for max_depth in range(5,20):
             for max_features in range(1,11):
@@ -1275,5 +1282,6 @@ if __name__ == '__main__':
                                     os.chdir('/home/fengyufei/PycharmProjects/competition/code')
                                 else:
                                     os.chdir('E:\competition\code')
+    '''
     print datetime.datetime.now()
 
