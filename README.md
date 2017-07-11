@@ -18,7 +18,8 @@ README
 全部用Python写成，Python也是我最喜欢的语言。
 用了大量的库,如Numpy,Pandas,Sklearn,Seaborn,Xgboost……
 更多的数据分析工作在ipython中实现了。
-最后ranked TOP5%(实习期间实在是没精力打比赛，太累了……)，第一次参加比赛，大量代码看起来真的很还丑陋，在之后的JD的比赛代码有很多改进。
+最后ranked TOP3%(实习期间实在是没精力打比赛，太累了……)
+第一次参加比赛，大量代码看起来真的很还丑陋，在之后的京东的比赛代码有很多改进。
 ```
 
 ## The Structure of the project?
